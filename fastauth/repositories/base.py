@@ -3,7 +3,7 @@ from typing import Dict, Any, Generic, Optional, List, Protocol, Type
 from fastauth.models import AUTH_MODEL, ID
 
 
-class AbstractCRUDRepository(ABC, Generic[AUTH_MODEL, ID]):
+class AbstractCRUDRepository(Generic[AUTH_MODEL, ID], ABC):
     model: Type[AUTH_MODEL]
 
     @abstractmethod

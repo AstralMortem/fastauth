@@ -10,17 +10,18 @@ from fastauth.backend.strategies import BaseStrategy
 from fastauth.backend.transport import BaseTransport
 from fastauth.config import FastAuthConfig
 from fastauth.manager import AuthManagerDependency, BaseAuthManager
-from fastauth.models import ID, UP, RP, PP
+from fastauth.models import ID, UP, RP, PP, OAP
 from fastauth.schemas import TokenPayload
 from fastauth.types import TokenType
+from fastauth import exceptions
 
 
-class FastAuth(Generic[UP, ID, RP, PP]):
+class FastAuth(Generic[UP, ID, RP, PP, OAP]):
 
     def __init__(
         self,
         config: FastAuthConfig,
-        auth_manager: AuthManagerDependency[UP, ID, RP, PP],
+        auth_manager: AuthManagerDependency[UP, ID, RP, PP, OAP],
         strategy: Type[BaseStrategy[UP]],
         transport: Type[BaseTransport],
     ):
@@ -39,14 +40,11 @@ class FastAuth(Generic[UP, ID, RP, PP]):
         @with_signature(sig)
         async def _authenticated(**kwargs):
             token = kwargs.get("token")
-            strategy: BaseStrategy = kwargs.get("strategy")
+            strategy: BaseStrategy[UP] = kwargs.get("strategy")
 
             token_payload: TokenPayload = await strategy.read_token(token)
             if token_payload.type != token_type:
-                raise HTTPException(
-                    status.HTTP_401_UNAUTHORIZED,
-                    f"Invalid Token: {token_type} token is required",
-                )
+                raise exceptions.InvalidToken(token_type)
 
             return token_payload
 
@@ -64,7 +62,7 @@ class FastAuth(Generic[UP, ID, RP, PP]):
         @with_signature(sig)
         async def _current_user(**kwargs):
             token_payload: TokenPayload = kwargs.get("token_payload")
-            manager: BaseAuthManager = kwargs.get("auth_manager")
+            manager: BaseAuthManager[UP, ID, RP, PP, OAP] = kwargs.get("auth_manager")
 
             not_allowed = HTTPException(status.HTTP_403_FORBIDDEN, "Access denied")
             user_id = manager.parse_user_id(token_payload.sub)
@@ -123,21 +121,21 @@ class FastAuth(Generic[UP, ID, RP, PP]):
         return Depends(self.authenticated())
 
     @property
-    def USER_REQUIRED(self):
+    def USER_REQUIRED(self) -> UP:
         return Depends(self.current_user())
 
     @property
-    def ADMIN_REQUIRED(self):
+    def ADMIN_REQUIRED(self) -> UP:
         return Depends(self.current_user(roles=self.config.DEFAULT_ADMIN_ROLES))
 
     @property
-    def AUTH_MANAGER(self):
+    def AUTH_MANAGER(self) -> BaseAuthManager[UP, ID, RP, PP, OAP]:
         return Depends(self._manager_dep)
 
     @property
-    def STRATEGY(self):
+    def STRATEGY(self) -> BaseStrategy[UP]:
         return Depends(lambda: self._strategy)
 
     @property
-    def TRANSPORT(self):
+    def TRANSPORT(self) -> BaseTransport:
         return self._transport

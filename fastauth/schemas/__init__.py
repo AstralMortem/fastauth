@@ -1,5 +1,13 @@
 from .token import TokenResponse, TokenPayload
-from .user import BaseUserRead, BaseUserUpdate, BaseUserCreate, UU_DTO, UC_DTO, UR_DTO
+from .user import (
+    BaseUserRead,
+    BaseUserUpdate,
+    BaseUserCreate,
+    UserRBACMixin,
+    UU_DTO,
+    UC_DTO,
+    UR_DTO,
+)
 from .rbac import (
     BaseRoleRead,
     BaseRoleCreate,
@@ -15,11 +23,13 @@ from .rbac import (
     RU_DTO,
 )
 
+from .oauth import OAuthRead, BaseOAuthMixin, OAR_DTO, OAuthCreate, OAC_DTO
+
 USER = [
     "BaseUserRead",
     "BaseUserUpdate",
     "BaseUserCreate",
-    "UU_DTO",
+    "UserRBACMixin" "UU_DTO",
     "UC_DTO",
     "UR_DTO",
 ]
@@ -40,6 +50,8 @@ PERMISSION = [
     "PR_DTO",
 ]
 
+OAUTH = ["OAuthRead", "BaseOAuthMixin", "OAR_DTO", "OAuthCreate", "OAC_DTO"]
+
 TOKEN = ["TokenResponse", "TokenPayload"]
 
-__all__ = USER + TOKEN + ROLE + PERMISSION
+__all__ = USER + TOKEN + ROLE + PERMISSION + OAUTH

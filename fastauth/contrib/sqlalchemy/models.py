@@ -1,10 +1,11 @@
 import uuid
 from typing import Generic, Optional, List, TYPE_CHECKING
-from fastauth.models import ID
+from fastauth.models import ID, RP, PP
 from sqlalchemy.orm import Mapped, mapped_column, relationship, declared_attr
 from sqlalchemy import String, UUID, JSON, ForeignKey, Integer
 
 
+# Base SQLAlchemy user model
 class SQLAlchemyUser(Generic[ID]):
     __tablename__ = "users"
     if TYPE_CHECKING:
@@ -24,10 +25,18 @@ class SQLAlchemyUser(Generic[ID]):
         is_verified: Mapped[bool] = mapped_column(default=False)
 
 
+# User model with UUID primary key
 class SQLAlchemyUserUUID(SQLAlchemyUser[uuid.UUID]):
     @declared_attr
     def id(self) -> Mapped[uuid.UUID]:
         return mapped_column(UUID(), default=uuid.uuid4, primary_key=True)
+
+
+class SQLAlchemyPermission:
+    __tablename__ = "permissions"
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)
+    codename: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    detail: Mapped[Optional[JSON]] = mapped_column(JSON())
 
 
 class SQLAlchemyRole:
@@ -40,28 +49,16 @@ class SQLAlchemyRole:
         return relationship(secondary="role_permission_rel")
 
 
-class SQLAlchemyPermission:
-    __tablename__ = "permissions"
-    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)
-    codename: Mapped[str] = mapped_column(String(100), unique=True, index=True)
-    detail: Mapped[Optional[JSON]] = mapped_column(JSON())
-
-
+# Mixin to add role to user model
 class SQLAlchemyRBACMixin:
-    @declared_attr
-    def roles(self):
-        return relationship(Mapped[List[SQLAlchemyRole]], secondary="user_role_rel")
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
 
     @declared_attr
-    def permissions(self):
-        return relationship(
-            Mapped[List[SQLAlchemyPermission]], secondary="user_permission_rel"
-        )
+    def role(self):
+        return relationship("SQLAlchemyRole")
 
 
 # relation role <- permissions
-
-
 class SQLAlchemyRolePermissionRel:
     __tablename__ = "role_permission_rel"
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), primary_key=True)
@@ -70,21 +67,42 @@ class SQLAlchemyRolePermissionRel:
     )
 
 
-# relation user <- roles
+class SQLAlchemyOAuthAccount(Generic[ID]):
+    __tablename__ = "oauth_accounts"
+    if TYPE_CHECKING:  # pragma: no cover
+        id: ID
+        oauth_name: str
+        access_token: str
+        expires_at: Optional[int]
+        refresh_token: Optional[str]
+        account_id: str
+        account_email: str
+    else:
+        oauth_name: Mapped[str] = mapped_column(
+            String(length=100), index=True, nullable=False
+        )
+        access_token: Mapped[str] = mapped_column(String(length=1024), nullable=False)
+        expires_at: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+        refresh_token: Mapped[Optional[str]] = mapped_column(
+            String(length=1024), nullable=True
+        )
+        account_id: Mapped[str] = mapped_column(
+            String(length=320), index=True, nullable=False
+        )
+        account_email: Mapped[str] = mapped_column(String(length=320), nullable=False)
 
 
-class SQLAlchemyUserRoleRel(Generic[ID]):
-    __tablename__ = "user_role_rel"
-    user_id: Mapped[ID] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), primary_key=True)
+class SQLAlchemyOAuthAccountUUID(SQLAlchemyOAuthAccount[uuid.UUID]):
+    if TYPE_CHECKING:  # pragma: no cover
+        id: uuid.UUID
+        user_id: uuid.UUID
+    else:
+        id: Mapped[uuid.UUID] = mapped_column(
+            UUID(), primary_key=True, default=uuid.uuid4
+        )
 
-
-# relation user <- permissions
-
-
-class SQLAlchemyUserPermissionRel(Generic[ID]):
-    __tablename__ = "user_permission_rel"
-    user_id: Mapped[ID] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    permission_id: Mapped[int] = mapped_column(
-        ForeignKey("permissions.id"), primary_key=True
-    )
+        @declared_attr
+        def user_id(cls) -> Mapped[UUID]:
+            return mapped_column(
+                UUID(), ForeignKey("users.id", ondelete="cascade"), nullable=False
+            )

@@ -2,11 +2,12 @@ from typing import Dict, Any, Type, Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastauth.models import ID, AUTH_MODEL, UP, RP, PP
+from fastauth.models import ID, AUTH_MODEL, UP, RP, PP, UOAP, OAP
 from fastauth.repositories import (
     AbstractUserRepository,
     AbstractRoleRepository,
     AbstractPermissionRepository,
+    AbstractOAuthRepository,
 )
 from fastauth.repositories.base import AbstractCRUDRepository
 
@@ -74,6 +75,37 @@ class SQLAlchemyPermissionRepository(
 
     def __init__(self, session: AsyncSession):
         self.session = session
+
+
+class SQLAlchemyOAuthRepository(
+    AbstractOAuthRepository[UOAP, OAP, ID], SQLAlchemyCRUDRepository[OAP, ID]
+):
+    model: Type[OAP]
+    user_model: Type[UOAP]
+
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def get_user_by_oauth(self, oauth_name: str, account_id: str) -> UOAP:
+        qs = (
+            select(self.user_model)
+            .join(self.model)
+            .where(self.model.oauth_name == oauth_name)  # type: ignore
+            .where(self.model.account_id == account_id)  # type: ignore
+        )
+        result = await self.session.execute(qs)
+        return result.unique().scalar_one_or_none()
+
+    async def add_oauth_account(self, user: UOAP, data: Dict[str, Any]) -> UOAP:
+        await self.session.refresh(user)
+        oauth_account = self.model(**data)
+        self.session.add(oauth_account)
+        user.oauth_accounts.append(oauth_account)  # type: ignore
+        self.session.add(user)
+
+        await self.session.commit()
+
+        return user
 
 
 __all__ = [

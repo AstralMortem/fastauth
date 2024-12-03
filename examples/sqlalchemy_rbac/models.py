@@ -1,14 +1,19 @@
-import uuid
+from typing import List
+
+from sqlalchemy.orm import Mapped, relationship
+
 from examples.db import Model
 from fastauth.contrib.sqlalchemy import models
 
 
 class User(models.SQLAlchemyUserUUID, models.SQLAlchemyRBACMixin, Model):
-    pass
+    role: Mapped["Role"] = relationship()
 
 
 class Role(models.SQLAlchemyRole, Model):
-    pass
+    permissions: Mapped[List["Permission"]] = relationship(
+        secondary="role_permission_rel"
+    )
 
 
 class Permission(models.SQLAlchemyPermission, Model):
@@ -16,12 +21,4 @@ class Permission(models.SQLAlchemyPermission, Model):
 
 
 class RolePermission(models.SQLAlchemyRolePermissionRel, Model):
-    pass
-
-
-class UserRole(models.SQLAlchemyUserRoleRel[uuid.UUID], Model):
-    pass
-
-
-class UserPermission(models.SQLAlchemyUserPermissionRel[uuid.UUID], Model):
     pass

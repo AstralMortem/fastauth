@@ -17,11 +17,13 @@ class FastAuthConfig(BaseSettings):
     JWT_AUDIENCE: list[str] = ["fastauth:auth"]
     JWT_USER_VERIFY_AUDIENCE: list[str] = ["fastauth:verify"]
     JWT_PASSWORD_RESET_AUDIENCE: list[str] = ["fastauth:reset"]
+    JWT_STATE_TOKEN_AUDIENCE: list[str] = ["fastapi-users:oauth-state"]
     JWT_ALGORITHM: str = "HS256"
     JWT_ACCESS_TOKEN_LIFETIME: int = ACCESS_TOKEN_LIFETIME
     JWT_REFRESH_TOKEN_LIFETIME: int = REFRESH_TOKEN_LIFETIME
     JWT_VERIFY_TOKEN_LIFETIME: int = 3600
     JWT_PASS_RESET_TOKEN_LIFETIME: int = 3600
+    JWT_STATE_TOKEN_LIFETIME: int = 3600
 
     COOKIE_ACCESS_NAME: str = "fastauth_access_token"
     COOKIE_REFRESH_NAME: str = "fastauth_refresh_token"
@@ -40,7 +42,11 @@ class FastAuthConfig(BaseSettings):
     USERS_ROUTER_DEFAULT_PREFIX: str = "/users"
     ROLES_ROUTER_DEFAULT_PREFIX: str = "/roles"
     PERMISSION_ROUTER_DEFAULT_PREFIX: str = "/permissions"
+    OAUTH_ROUTER_DEFAULT_PREFIX: str = "/oauth"
 
     USER_DATA_IN_REFRESH_TOKEN: bool = False
     DEFAULT_ADMIN_ROLES: List[str] = ["Admin"]
     DEFAULT_USER_ROLE: str = "User"
+
+    OAUTH_ASSOCIATE_WITH_EMAIL: bool = True
+    OAUTH_IS_VERIFIED_DEFAULT: bool = True

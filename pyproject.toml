@@ -17,6 +17,7 @@ makefun = "^1.15.6"
 sqlalchemy = "^2.0.36"
 aiosqlite = "^0.20.0"
 python-multipart = "^0.0.17"
+httpx-oauth = "^0.15.1"
 
 
 [build-system]
