@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings
 
 class FastAuthConfig(BaseSettings):
     ENABLE_REFRESH_TOKEN: bool = True
+    ENABLE_RBAC: bool = True
 
     ACCESS_TOKEN_LIFETIME: int = 60 * 60 * 24  # 1 day
     REFRESH_TOKEN_LIFETIME: int = 60 * 60 * 24 * 30  # 30 days
@@ -42,3 +43,4 @@ class FastAuthConfig(BaseSettings):
 
     USER_DATA_IN_REFRESH_TOKEN: bool = False
     DEFAULT_ADMIN_ROLES: List[str] = ["Admin"]
+    DEFAULT_USER_ROLE: str = "User"

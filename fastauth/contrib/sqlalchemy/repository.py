@@ -2,7 +2,7 @@ from typing import Dict, Any, Type, Optional
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastauth.models import ID, AUTH_MODEL, UP, RP, RP_ID, PP, PP_ID
+from fastauth.models import ID, AUTH_MODEL, UP, RP, PP
 from fastauth.repositories import (
     AbstractUserRepository,
     AbstractRoleRepository,
@@ -59,7 +59,7 @@ class SQLAlchemyUserRepository(
 
 
 class SQLAlchemyRoleRepository(
-    AbstractRoleRepository[RP, RP_ID], SQLAlchemyCRUDRepository[RP, RP_ID]
+    AbstractRoleRepository[RP], SQLAlchemyCRUDRepository[RP, int]
 ):
     model: Type[RP]
 
@@ -68,7 +68,7 @@ class SQLAlchemyRoleRepository(
 
 
 class SQLAlchemyPermissionRepository(
-    AbstractPermissionRepository[PP, PP_ID], SQLAlchemyCRUDRepository[PP, PP_ID]
+    AbstractPermissionRepository[PP], SQLAlchemyCRUDRepository[PP, int]
 ):
     model: Type[PP]
 

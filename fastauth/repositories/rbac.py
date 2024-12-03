@@ -1,14 +1,12 @@
-from abc import abstractmethod
-from fastauth.models import PP_ID, RP_ID, RP, PP
-from typing import Generic, Optional, Type
+from abc import ABC
+from fastauth.models import RP, PP
+from typing import Generic, Type
 from fastauth.repositories.base import AbstractCRUDRepository
 
 
-class AbstractRoleRepository(Generic[RP, RP_ID], AbstractCRUDRepository[RP, RP_ID]):
+class AbstractRoleRepository(Generic[RP], AbstractCRUDRepository[RP, int], ABC):
     model: Type[RP]
 
 
-class AbstractPermissionRepository(
-    Generic[PP, PP_ID], AbstractCRUDRepository[PP, PP_ID]
-):
+class AbstractPermissionRepository(Generic[PP], AbstractCRUDRepository[PP, int], ABC):
     model: Type[PP]

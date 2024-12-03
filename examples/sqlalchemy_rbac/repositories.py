@@ -7,9 +7,9 @@ class UserRepository(repository.SQLAlchemyUserRepository[User, uuid.UUID]):
     model = User
 
 
-class RoleRepository(repository.SQLAlchemyRoleRepository[Role, int]):
+class RoleRepository(repository.SQLAlchemyRoleRepository[Role]):
     model = Role
 
 
-class PermissionRepository(repository.SQLAlchemyPermissionRepository[Permission, int]):
+class PermissionRepository(repository.SQLAlchemyPermissionRepository[Permission]):
     model = Permission

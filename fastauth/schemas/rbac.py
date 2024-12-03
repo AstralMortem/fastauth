@@ -1,11 +1,9 @@
 from typing import Generic, Optional, TypeVar, List
-
 from .base import DTO
-from fastauth.models import RP_ID, PP_ID
 
 
-class BasePermissionRead(DTO, Generic[PP_ID]):
-    id: PP_ID
+class BasePermissionRead(DTO):
+    id: int
     codename: str
     detail: Optional[dict] = None
 
@@ -25,8 +23,8 @@ PC_DTO = TypeVar("PC_DTO", bound=BasePermissionCreate)
 PU_DTO = TypeVar("PU_DTO", bound=BasePermissionUpdate)
 
 
-class BaseRoleRead(DTO, Generic[RP_ID, PR_DTO]):
-    id: RP_ID
+class BaseRoleRead(DTO, Generic[PR_DTO]):
+    id: int
     name: str
     permissions: List[PR_DTO] = []
 

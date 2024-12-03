@@ -4,22 +4,24 @@ from typing import Type, cast, List, Optional
 from fastapi import Depends, status, HTTPException
 from makefun import with_signature
 from sqlalchemy.util import await_only
+from typing_extensions import Generic
 
 from fastauth.backend.strategies import BaseStrategy
 from fastauth.backend.transport import BaseTransport
 from fastauth.config import FastAuthConfig
 from fastauth.manager import AuthManagerDependency, BaseAuthManager
+from fastauth.models import ID, UP, RP, PP
 from fastauth.schemas import TokenPayload
 from fastauth.types import TokenType
 
 
-class FastAuth:
+class FastAuth(Generic[UP, ID, RP, PP]):
 
     def __init__(
         self,
         config: FastAuthConfig,
-        auth_manager: AuthManagerDependency,
-        strategy: Type[BaseStrategy],
+        auth_manager: AuthManagerDependency[UP, ID, RP, PP],
+        strategy: Type[BaseStrategy[UP]],
         transport: Type[BaseTransport],
     ):
         self._config = config
@@ -30,18 +32,6 @@ class FastAuth:
     @property
     def config(self):
         return self._config
-
-    @property
-    def get_manager(self):
-        return self._manager_dep
-
-    @property
-    def get_strategy(self):
-        return lambda: self._strategy
-
-    @property
-    def transport(self):
-        return self._transport
 
     def authenticated(self, token_type: TokenType = "access"):
         sig = self._get_authenticated_call_signature()
@@ -95,12 +85,12 @@ class FastAuth:
             Parameter(
                 name="strategy",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
-                default=Depends(cast(Callable, self.get_strategy)),
+                default=self.STRATEGY,
             ),
             Parameter(
                 name="token",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
-                default=Depends(cast(Callable, self.transport.schema())),
+                default=Depends(cast(Callable, self.TRANSPORT.schema())),
             ),
         ]
         return Signature(parameters)
@@ -110,7 +100,7 @@ class FastAuth:
             Parameter(
                 name="auth_manager",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
-                default=Depends(self.get_manager),
+                default=self.AUTH_MANAGER,
                 annotation=BaseAuthManager,
             ),
             Parameter(

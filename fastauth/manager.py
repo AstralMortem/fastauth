@@ -4,7 +4,7 @@ from jwt import PyJWTError
 from fastauth.config import FastAuthConfig
 from fastauth.schemas import UU_DTO, UC_DTO
 from fastauth.types import DependencyCallable
-from fastauth.models import UP, RP, PP, ID, PP_ID, RP_ID
+from fastauth.models import UP, RP, PP, ID
 from fastauth.repositories import (
     AbstractUserRepository,
     AbstractRoleRepository,
@@ -14,18 +14,15 @@ from fastauth.utils.jwt_helper import encode_jwt, decode_jwt
 from fastauth.utils.password import PasswordHelperProtocol, PasswordHelper
 
 
-class BaseAuthManager(Generic[UP, ID, RP, RP_ID, PP, PP_ID]):
-
+class BaseAuthManager(Generic[UP, ID, RP, PP]):
     user_pk_field: ID
-    role_pk_field: RP_ID
-    permission_pk_field: PP_ID
 
     def __init__(
         self,
         config: FastAuthConfig,
         user_repository: AbstractUserRepository[UP, ID],
-        role_repository: Optional[AbstractRoleRepository[RP, RP_ID]] = None,
-        permission_repository: Optional[AbstractPermissionRepository[PP, PP_ID]] = None,
+        role_repository: Optional[AbstractRoleRepository[RP]] = None,
+        permission_repository: Optional[AbstractPermissionRepository[PP]] = None,
         password_helper: PasswordHelperProtocol = PasswordHelper(),
     ):
         self._config = config
@@ -34,21 +31,8 @@ class BaseAuthManager(Generic[UP, ID, RP, RP_ID, PP, PP_ID]):
         self.perm_repo = permission_repository
         self.password_helper = password_helper
 
-    def _cast_id(
-        self, pk: Any, field_type: Union[ID, RP_ID, PP_ID]
-    ) -> Union[ID, RP_ID, PP_ID]:
-        if not isinstance(pk, field_type):
-            return field_type(pk)
-        return pk
-
     def parse_user_id(self, pk: Any) -> ID:
-        return self._cast_id(pk, self.user_pk_field)
-
-    def parse_role_id(self, pk: Any) -> RP_ID:
-        return self._cast_id(pk, self.role_pk_field)
-
-    def parse_permission_id(self, pk: Any) -> PP_ID:
-        return self._cast_id(pk, self.permission_pk_field)
+        return self.user_pk_field(pk)
 
     async def user_login(self, email: str, password: str):
         instance = await self.user_repo.get_by_email(email)
@@ -216,6 +200,4 @@ class BaseAuthManager(Generic[UP, ID, RP, RP_ID, PP, PP_ID]):
         return updated_user
 
 
-AuthManagerDependency = DependencyCallable[
-    BaseAuthManager[UP, ID, RP, RP_ID, PP, PP_ID]
-]
+AuthManagerDependency = DependencyCallable[BaseAuthManager[UP, ID, RP, PP]]

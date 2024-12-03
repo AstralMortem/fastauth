@@ -1,22 +1,17 @@
-import uuid
 from typing import Protocol, TypeVar, Union
 
-PP_ID = TypeVar("PP_ID")
 
-
-class PermissionProtocol(Protocol[PP_ID]):
-    id: PP_ID
+class PermissionProtocol(Protocol):
+    id: int
     codename: str
     detail: dict
 
 
 PP = TypeVar("PP", bound=PermissionProtocol)
 
-RP_ID = TypeVar("RP_ID")
 
-
-class RoleProtocol(Protocol[RP_ID]):
-    id: RP_ID
+class RoleProtocol(Protocol):
+    id: int
     name: str
     permissions: list[PermissionProtocol]
 

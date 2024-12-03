@@ -1,14 +1,8 @@
 import uuid
 from typing import Generic, Optional, List, TYPE_CHECKING
-from fastauth.models import ID, RP_ID, PP_ID
+from fastauth.models import ID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, declared_attr
-from sqlalchemy import String, UUID, JSON, ForeignKey
-
-
-class UUIDMixin:
-    @declared_attr
-    def id(self) -> Mapped[uuid.UUID]:
-        return mapped_column(UUID(), default=uuid.uuid4, primary_key=True)
+from sqlalchemy import String, UUID, JSON, ForeignKey, Integer
 
 
 class SQLAlchemyUser(Generic[ID]):
@@ -30,37 +24,27 @@ class SQLAlchemyUser(Generic[ID]):
         is_verified: Mapped[bool] = mapped_column(default=False)
 
 
-class SQLAlchemyUserUUID(SQLAlchemyUser[uuid.UUID], UUIDMixin):
-    pass
+class SQLAlchemyUserUUID(SQLAlchemyUser[uuid.UUID]):
+    @declared_attr
+    def id(self) -> Mapped[uuid.UUID]:
+        return mapped_column(UUID(), default=uuid.uuid4, primary_key=True)
 
 
-class SQLAlchemyRole(Generic[RP_ID]):
+class SQLAlchemyRole:
     __tablename__ = "roles"
-    if TYPE_CHECKING:
-        id: RP_ID
-        name: str
-    else:
-        # id: Mapped[RP_ID] = mapped_column(primary_key=True)
-        name: Mapped[str] = mapped_column(String(100), unique=True, index=True)
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), unique=True, index=True)
 
     @declared_attr
     def permissions(self) -> Mapped[List["SQLAlchemyPermission"]]:
         return relationship(secondary="role_permission_rel")
 
 
-class SQLAlchemyRoleUUID(SQLAlchemyRole[uuid.UUID], UUIDMixin):
-    pass
-
-
-class SQLAlchemyPermission(Generic[PP_ID]):
+class SQLAlchemyPermission:
     __tablename__ = "permissions"
-    id: Mapped[PP_ID] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)
     codename: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     detail: Mapped[Optional[JSON]] = mapped_column(JSON())
-
-
-class SQLAlchemyPermissionUUID(SQLAlchemyPermission[uuid.UUID], UUIDMixin):
-    pass
 
 
 class SQLAlchemyRBACMixin:
@@ -78,10 +62,10 @@ class SQLAlchemyRBACMixin:
 # relation role <- permissions
 
 
-class SQLAlchemyRolePermissionRel(Generic[RP_ID, PP_ID]):
+class SQLAlchemyRolePermissionRel:
     __tablename__ = "role_permission_rel"
-    role_id: Mapped[RP_ID] = mapped_column(ForeignKey("roles.id"), primary_key=True)
-    permission_id: Mapped[PP_ID] = mapped_column(
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), primary_key=True)
+    permission_id: Mapped[int] = mapped_column(
         ForeignKey("permissions.id"), primary_key=True
     )
 
@@ -89,18 +73,18 @@ class SQLAlchemyRolePermissionRel(Generic[RP_ID, PP_ID]):
 # relation user <- roles
 
 
-class SQLAlchemyUserRoleRel(Generic[ID, RP_ID]):
+class SQLAlchemyUserRoleRel(Generic[ID]):
     __tablename__ = "user_role_rel"
     user_id: Mapped[ID] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    role_id: Mapped[RP_ID] = mapped_column(ForeignKey("roles.id"), primary_key=True)
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), primary_key=True)
 
 
 # relation user <- permissions
 
 
-class SQLAlchemyUserPermissionRel(Generic[ID, PP_ID]):
+class SQLAlchemyUserPermissionRel(Generic[ID]):
     __tablename__ = "user_permission_rel"
     user_id: Mapped[ID] = mapped_column(ForeignKey("users.id"), primary_key=True)
-    permission_id: Mapped[PP_ID] = mapped_column(
+    permission_id: Mapped[int] = mapped_column(
         ForeignKey("permissions.id"), primary_key=True
     )
