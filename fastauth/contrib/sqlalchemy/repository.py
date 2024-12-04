@@ -80,6 +80,10 @@ class SQLAlchemyPermissionRepository(
     def __init__(self, session: AsyncSession):
         self.session = session
 
+    async def get_by_code(self, codename: str) -> Optional[PP]:
+        qs = select(self.model).where(self.model.codename == codename).limit(1)
+        return await self.session.scalar(qs)
+
 
 class SQLAlchemyOAuthRepository(
     AbstractOAuthRepository[UOAP, OAP, ID], SQLAlchemyCRUDRepository[OAP, ID]

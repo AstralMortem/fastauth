@@ -2,11 +2,21 @@ from typing import Type, Optional, List, Union, Tuple, Dict, Any
 
 from fastapi import FastAPI, APIRouter
 from httpx_oauth.oauth2 import BaseOAuth2
-from fastauth.schemas import UR_DTO, UC_DTO, UU_DTO, RR_DTO, RC_DTO, RU_DTO
+from fastauth.schemas import (
+    UR_DTO,
+    UC_DTO,
+    UU_DTO,
+    RR_DTO,
+    RC_DTO,
+    RU_DTO,
+    PU_DTO,
+    PC_DTO,
+)
 from fastauth.fastauth import FastAuth
 from .auth import get_auth_router
 from .oauth import get_oauth_router
 from .password import get_password_router
+from .permissions import get_permissions_router
 from .register import get_register_router
 from .roles import get_roles_router
 from .users import get_users_router
@@ -51,6 +61,23 @@ class FastAuthRouter:
             role_read,
             role_create,
             role_update,
+            default_roles,
+            default_permissions,
+        )
+
+    def get_permission_router(
+        self,
+        permission_read: Type[PU_DTO],
+        permission_create: Type[PC_DTO],
+        permission_update: Type[PU_DTO],
+        default_roles: Optional[List[str]] = None,
+        default_permissions: Optional[List[str]] = None,
+    ):
+        return get_permissions_router(
+            self._security,
+            permission_read,
+            permission_create,
+            permission_update,
             default_roles,
             default_permissions,
         )

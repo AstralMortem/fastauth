@@ -10,20 +10,9 @@ from fastauth.schemas import (
     BaseUserCreate,
     BaseUserUpdate,
     BaseUserRead,
-    UserRBACMixin,
+    BaseRBACMixin,
+    BaseRBACCreateMixin,
 )
-
-
-class UserRead(BaseUserRead[uuid.UUID], UserRBACMixin):
-    pass
-
-
-class UserCreate(BaseUserCreate):
-    pass
-
-
-class UserUpdate(BaseUserUpdate):
-    pass
 
 
 class PermissionRead(BasePermissionRead):
@@ -47,4 +36,16 @@ class RoleCreate(BaseRoleCreate):
 
 
 class RoleUpdate(BaseRoleUpdate):
+    pass
+
+
+class UserRead(BaseUserRead[uuid.UUID], BaseRBACMixin[RoleRead]):
+    pass
+
+
+class UserCreate(BaseUserCreate, BaseRBACCreateMixin):
+    pass
+
+
+class UserUpdate(BaseUserUpdate):
     pass

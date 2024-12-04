@@ -11,6 +11,6 @@ def get_register_router(
 
     @router.post("/register", response_model=user_read)
     async def register(data: user_create, manager=self.AUTH_MANAGER):
-        return await manager.register_user(data)
+        return await manager.create_user(data)
 
     return router

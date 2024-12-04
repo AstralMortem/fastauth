@@ -14,3 +14,7 @@ class AbstractRoleRepository(Generic[RP], AbstractCRUDRepository[RP, int], ABC):
 
 class AbstractPermissionRepository(Generic[PP], AbstractCRUDRepository[PP, int], ABC):
     model: Type[PP]
+
+    @abstractmethod
+    async def get_by_code(self, codename: str) -> RP:
+        raise NotImplementedError

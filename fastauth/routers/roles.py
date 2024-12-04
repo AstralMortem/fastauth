@@ -34,3 +34,5 @@ def get_roles_router(
     @router.delete("/{id}", dependencies=[secured])
     async def delete_role(id: int, manager=self.AUTH_MANAGER):
         await manager.delete_role(id)
+
+    return router

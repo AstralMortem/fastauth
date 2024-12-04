@@ -12,7 +12,7 @@ def get_auth_router(self: FastAuth):
         strategy=self.STRATEGY,
         credentials: OAuth2PasswordRequestForm = Depends(),
     ):
-        user = await manager.user_login(credentials.username, credentials.password)
+        user = await manager.login_user(credentials.username, credentials.password)
         access_token = await strategy.write_token(user)
         if self.config.ENABLE_REFRESH_TOKEN:
             refresh_token = await strategy.write_token(user, "refresh")

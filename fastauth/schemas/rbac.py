@@ -40,3 +40,11 @@ class BaseRoleUpdate(DTO):
 RR_DTO = TypeVar("RR_DTO", bound=BaseRoleRead)
 RC_DTO = TypeVar("RC_DTO", bound=BaseRoleCreate)
 RU_DTO = TypeVar("RU_DTO", bound=BaseRoleUpdate)
+
+
+class BaseRBACMixin(Generic[RR_DTO]):
+    role: RR_DTO
+
+
+class BaseRBACCreateMixin:
+    role: Optional[str] = None

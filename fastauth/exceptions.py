@@ -42,5 +42,31 @@ OAuthUserNotActive = HTTPException(status.HTTP_400_BAD_REQUEST, "User is not act
 
 AccessDenied = HTTPException(status.HTTP_403_FORBIDDEN, "Access denied")
 
-RoleNotExists = HTTPException(status.HTTP_403_FORBIDDEN, "Role not found")
+
+class RoleNotExists(HTTPException):
+    def __init__(self, extra: Optional[str] = None):
+        msg = "Role not found"
+        if extra:
+            msg += f": {extra}"
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=msg)
+
+
 RoleAlreadyExists = HTTPException(status.HTTP_403_FORBIDDEN, "Role already exists")
+
+
+class PermissionNotExists(HTTPException):
+    def __init__(self, extra: Optional[str] = None):
+        msg = "Permission not found"
+        if extra:
+            msg += f": {extra}"
+        super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=msg)
+
+
+PermissionAlreadyExists = HTTPException(
+    status.HTTP_403_FORBIDDEN, "Permission already exists"
+)
+
+
+InvalidCredentials = HTTPException(
+    status.HTTP_401_UNAUTHORIZED, "Invalid credentials: Email or password"
+)

@@ -3,7 +3,7 @@ from typing import Generic, Optional, Any, Union, Type, Dict
 from jwt import PyJWTError
 from fastauth.config import FastAuthConfig
 from fastauth.repositories.oauth import AbstractOAuthRepository
-from fastauth.schemas import UU_DTO, UC_DTO, RC_DTO, OAR_DTO, OAC_DTO, RU_DTO
+from fastauth.schemas import UU_DTO, UC_DTO, RC_DTO, OAR_DTO, OAC_DTO, RU_DTO, PC_DTO
 from fastauth.types import DependencyCallable
 from fastauth.models import UP, RP, PP, ID, OAP, UOAP
 from fastauth.repositories import (
@@ -82,12 +82,32 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
             raise exceptions.UserNotExists()
         return user
 
+    async def login_user(self, username: str, password: str) -> UP:
+        try:
+            instance = await self.get_user_by_email(username)
+        except exceptions.UserNotExists:
+            # Run the hasher to mitigate timing attack
+            # Inspired from Django: https://code.djangoproject.com/ticket/20760
+            self.password_helper.hash(password)
+            raise exceptions.UserNotExists
+
+        check, new_hash = self.password_helper.verify_and_update(
+            password, instance.hashed_password
+        )
+        if not check:
+            raise exceptions.InvalidCredentials
+        if new_hash is not None:
+            instance = await self.user_repo.update(
+                instance, {"hashed_password": new_hash}
+            )
+        return instance
+
     async def oauth_callback(
         self: "BaseAuthManager[UOAP, ID, RP, PP, OAP]",
         oauth_schema: Type[OAC_DTO],
         *,
         associate_by_email: bool = False,
-        is_verified_by_default: bool = False
+        is_verified_by_default: bool = False,
     ) -> UOAP:
         """
         Call OAuth callback when user try to authenticate over OAuth
@@ -148,14 +168,14 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         # TODO: add on_after_update event
         return user
 
-    async def create_user(self, user_create: UC_DTO, safe: bool = False):
+    async def create_user(self, user_create: UC_DTO, safe: bool = True):
         """
         Check if user already exists, if not create new
         :param user_create:
         :param safe:
         :return: User
         """
-        existing_user = self.user_repo.get_by_email(user_create.email)
+        existing_user = await self.user_repo.get_by_email(user_create.email)
         if existing_user is not None:
             raise exceptions.UserAlreadyExists
 
@@ -163,6 +183,16 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         if safe:
             validated_data.pop("is_active")
             validated_data.pop("is_verified")
+        if hasattr(user_create, "role"):
+            role = user_create.role
+            if safe:
+                role = self._config.DEFAULT_USER_REGISTER_ROLE
+            if role:
+                role_instance = await self.get_role_by_name(role)
+                role_id = role_instance.id
+                validated_data["role_id"] = role_id
+        validated_data.pop("role", None)
+
         password = validated_data.pop("password")
         validated_data["hashed_password"] = self.password_helper.hash(password)
         new_user = await self.user_repo.create(validated_data)
@@ -218,26 +248,47 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
 
     # ============== ROLES CRUD Operation ======================
     async def get_role(self, role_id: int):
+        """
+        Ger role by id or raise RoleNotExists exception
+        :param role_id:
+        :return: Role
+        """
         instance = await self.role_repo.get_by_id(role_id)
         if instance is None:
-            raise exceptions.RoleNotExists()
+            raise exceptions.RoleNotExists
         return instance
 
     async def get_role_by_name(self, role_name: str):
+        """
+        Get role by role name or raise RoleNotExists exception
+        :param role_name:
+        :return:
+        """
         instance = await self.role_repo.get_by_name(role_name)
         if instance is None:
-            raise exceptions.RoleNotExists()
+            raise exceptions.RoleNotExists(f"{role_name} role")
         return instance
 
     async def create_role(self, data: Type[RC_DTO]):
+        """
+        Create role or raise RoleAlreadyExists
+        :param data:
+        :return:
+        """
         try:
             await self.get_role_by_name(data.name)
-            raise exceptions.RoleAlreadyExists()
+            raise exceptions.RoleAlreadyExists
         except exceptions.RoleNotExists:
             valid_data = data.model_dump()
             return await self.role_repo.create(valid_data)
 
     async def update_role(self, role_id: int, data: Type[RU_DTO]):
+        """
+        Update role
+        :param role_id:
+        :param data:
+        :return:
+        """
         instance = await self.get_role(role_id)
         valid_data = data.model_dump(
             exclude_none=True, exclude_unset=True, exclude_defaults=True
@@ -245,8 +296,46 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         return self.role_repo.update(instance, valid_data)
 
     async def delete_role(self, role_id: int):
+        """
+        Delete role
+        :param role_id:
+        :return:
+        """
         instance = await self.get_role(role_id)
         await self.role_repo.delete(instance)
+
+    # ============== PERMISSION CRUD Operation ======================
+    async def get_permission(self, permission_id: int):
+        instance = await self.perm_repo.get_by_id(permission_id)
+        if instance is None:
+            raise exceptions.PermissionNotExists
+        return instance
+
+    async def get_permission_by_codename(self, permission_code: str):
+
+        instance = await self.perm_repo.get_by_code(permission_code)
+        if instance is None:
+            raise exceptions.PermissionNotExists(f"{permission_code} permission")
+        return instance
+
+    async def create_permission(self, data: Type[PC_DTO]):
+        try:
+            await self.get_permission_by_codename(data.codename)
+            raise exceptions.PermissionAlreadyExists
+        except exceptions.PermissionNotExists:
+            valid_data = data.model_dump()
+            return await self.perm_repo.create(valid_data)
+
+    async def update_permission(self, permission_id: int, data: Type[PC_DTO]):
+        instance = await self.get_permission(permission_id)
+        valid_data = data.model_dump(
+            exclude_none=True, exclude_unset=True, exclude_defaults=True
+        )
+        return self.perm_repo.update(instance, valid_data)
+
+    async def delete_permission(self, permission_id: int):
+        instance = await self.get_permission(permission_id)
+        await self.perm_repo.delete(instance)
 
 
 # class BaseAuthManager(Generic[UP, ID, RP, PP]):
