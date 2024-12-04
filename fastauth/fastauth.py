@@ -54,21 +54,27 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP]):
         self,
         roles: Optional[List[str]] = None,
         permissions: Optional[List[str]] = None,
-        is_active: bool = True,
-        is_verified: bool = True,
+        is_active: Optional[bool] = None,
+        is_verified: Optional[bool] = None,
     ):
         sig = self._get_user_call_signature(self.authenticated())
+
+        is_user_active = (
+            is_active if is_active else self.config.DEFAULT_CURRENT_USER_IS_ACTIVE
+        )
+        is_user_verified = (
+            is_verified if is_verified else self.config.DEFAULT_CURRENT_USER_IS_VERIFIED
+        )
 
         @with_signature(sig)
         async def _current_user(**kwargs):
             token_payload: TokenPayload = kwargs.get("token_payload")
             manager: BaseAuthManager[UP, ID, RP, PP, OAP] = kwargs.get("auth_manager")
 
-            not_allowed = HTTPException(status.HTTP_403_FORBIDDEN, "Access denied")
             user_id = manager.parse_user_id(token_payload.sub)
             user = await manager.get_user(user_id)
-            if user.is_active != is_active or user.is_verified != is_verified:
-                raise not_allowed
+            if user.is_active != is_user_active or user.is_verified != is_user_verified:
+                raise exceptions.AccessDenied
 
             if roles or permissions:
                 # todo: implement role and permission check
@@ -122,7 +128,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP]):
 
     @property
     def USER_REQUIRED(self) -> UP:
-        return Depends(self.current_user())
+        return Depends(self.current_user(roles=self.config.DEFAULT_USER_ROLES))
 
     @property
     def ADMIN_REQUIRED(self) -> UP:

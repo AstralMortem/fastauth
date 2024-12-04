@@ -11,7 +11,7 @@ class BaseTransport(ABC):
         self._config = config
 
     @abstractmethod
-    async def schema(self):
+    def schema(self):
         raise NotImplementedError
 
     @abstractmethod

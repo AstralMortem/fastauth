@@ -2,7 +2,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastauth.backend.strategies import JWTStrategy
-from fastauth.backend.transport import BearerTransport
+from fastauth.backend.transport import BearerTransport, CookieTransport
 from .manager import AuthManager
 from .repositories import UserRepository, OAuthRepository
 from fastauth.config import FastAuthConfig
@@ -18,4 +18,4 @@ def get_auth_manager(session: AsyncSession = Depends(get_db)):
     )
 
 
-security = FastAuth(config, get_auth_manager, JWTStrategy, BearerTransport)
+security = FastAuth(config, get_auth_manager, JWTStrategy, CookieTransport)

@@ -67,6 +67,10 @@ class SQLAlchemyRoleRepository(
     def __init__(self, session: AsyncSession):
         self.session = session
 
+    async def get_by_name(self, role_name: str) -> RP:
+        qs = select(self.model).where(self.model.name == role_name).limit(1)
+        return await self.session.scalar(qs)
+
 
 class SQLAlchemyPermissionRepository(
     AbstractPermissionRepository[PP], SQLAlchemyCRUDRepository[PP, int]

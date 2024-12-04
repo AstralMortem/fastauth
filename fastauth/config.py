@@ -46,7 +46,9 @@ class FastAuthConfig(BaseSettings):
 
     USER_DATA_IN_REFRESH_TOKEN: bool = False
     DEFAULT_ADMIN_ROLES: List[str] = ["Admin"]
-    DEFAULT_USER_ROLE: str = "User"
+    DEFAULT_USER_ROLES: List[str] = ["User"]
+    DEFAULT_CURRENT_USER_IS_ACTIVE: bool = True
+    DEFAULT_CURRENT_USER_IS_VERIFIED: bool = True
 
     OAUTH_ASSOCIATE_WITH_EMAIL: bool = True
     OAUTH_IS_VERIFIED_DEFAULT: bool = True

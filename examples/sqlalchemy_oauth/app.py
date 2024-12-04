@@ -6,6 +6,7 @@ from .models import Model
 from examples.db import sessionmanager
 from fastauth.routers import FastAuthRouter
 from .oauth_client import github_client
+from .schema import UserRead, UserCreate, UserUpdate
 
 
 @asynccontextmanager
@@ -20,4 +21,7 @@ app = FastAPI(lifespan=init_db)
 auth_router = FastAuthRouter(security)
 
 app.include_router(auth_router.get_auth_router(), tags=["Auth"])
-app.include_router(auth_router.get_oauth_router(github_client))
+app.include_router(
+    auth_router.get_users_router(UserRead, UserCreate, UserUpdate), tags=["Users"]
+)
+app.include_router(auth_router.get_oauth_router(github_client), tags=["OAuth"])

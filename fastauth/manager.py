@@ -3,7 +3,7 @@ from typing import Generic, Optional, Any, Union, Type, Dict
 from jwt import PyJWTError
 from fastauth.config import FastAuthConfig
 from fastauth.repositories.oauth import AbstractOAuthRepository
-from fastauth.schemas import UU_DTO, UC_DTO, RC_DTO, OAR_DTO, OAC_DTO
+from fastauth.schemas import UU_DTO, UC_DTO, RC_DTO, OAR_DTO, OAC_DTO, RU_DTO
 from fastauth.types import DependencyCallable
 from fastauth.models import UP, RP, PP, ID, OAP, UOAP
 from fastauth.repositories import (
@@ -52,7 +52,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         :param user_id: User primary key
         :return: User
         """
-        instance = self.user_repo.get_by_id(user_id)
+        instance = await self.user_repo.get_by_id(user_id)
         if instance is None:
             raise exceptions.UserNotExists()
         return instance
@@ -89,6 +89,14 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         associate_by_email: bool = False,
         is_verified_by_default: bool = False
     ) -> UOAP:
+        """
+        Call OAuth callback when user try to authenticate over OAuth
+        :param oauth_schema: Scheme to create oauth_account in db
+        :param associate_by_email: if true then try to find user by email and associate it with email
+        :param is_verified_by_default: set is_verified to True or False
+        :return:
+        """
+
         oauth_account_dict = oauth_schema.model_dump()
         try:
             user = await self.get_user_by_oauth_account(
@@ -125,8 +133,15 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
     async def oauth_associate_callback(
         self: "BaseAuthManager[UOAP, ID, RP, PP, OAP]",
         user_id: ID,
-        oauth_schema: Type[OAR_DTO],
+        oauth_schema: Type[OAC_DTO],
     ) -> UOAP:
+        """
+        Used to manually associate user with oauth account
+        :param user_id:
+        :param oauth_schema:
+        :return:
+        """
+
         oauth_account_dict = oauth_schema.model_dump()
         user = await self.get_user(user_id)
         user = await self.oauth_repo.add_oauth_account(user, oauth_account_dict)
@@ -200,6 +215,38 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         await self.user_repo.delete(user)
         # TODO: Add on_after_delete event
         return None
+
+    # ============== ROLES CRUD Operation ======================
+    async def get_role(self, role_id: int):
+        instance = await self.role_repo.get_by_id(role_id)
+        if instance is None:
+            raise exceptions.RoleNotExists()
+        return instance
+
+    async def get_role_by_name(self, role_name: str):
+        instance = await self.role_repo.get_by_name(role_name)
+        if instance is None:
+            raise exceptions.RoleNotExists()
+        return instance
+
+    async def create_role(self, data: Type[RC_DTO]):
+        try:
+            await self.get_role_by_name(data.name)
+            raise exceptions.RoleAlreadyExists()
+        except exceptions.RoleNotExists:
+            valid_data = data.model_dump()
+            return await self.role_repo.create(valid_data)
+
+    async def update_role(self, role_id: int, data: Type[RU_DTO]):
+        instance = await self.get_role(role_id)
+        valid_data = data.model_dump(
+            exclude_none=True, exclude_unset=True, exclude_defaults=True
+        )
+        return self.role_repo.update(instance, valid_data)
+
+    async def delete_role(self, role_id: int):
+        instance = await self.get_role(role_id)
+        await self.role_repo.delete(instance)
 
 
 # class BaseAuthManager(Generic[UP, ID, RP, PP]):

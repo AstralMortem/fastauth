@@ -41,3 +41,6 @@ OAuthUnavailableEmail = HTTPException(
 OAuthUserNotActive = HTTPException(status.HTTP_400_BAD_REQUEST, "User is not active")
 
 AccessDenied = HTTPException(status.HTTP_403_FORBIDDEN, "Access denied")
+
+RoleNotExists = HTTPException(status.HTTP_403_FORBIDDEN, "Role not found")
+RoleAlreadyExists = HTTPException(status.HTTP_403_FORBIDDEN, "Role already exists")

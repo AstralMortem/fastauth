@@ -26,10 +26,11 @@ app.include_router(auth_routers.get_auth_router(), tags=["Auth"])
 app.include_router(
     auth_routers.get_users_router(UserRead, UserCreate, UserUpdate), tags=["Users"]
 )
-app.include_router(
-    auth_routers.get_register_router(UserRead, UserCreate), tags=["Auth"]
-)
 
-app.include_router(auth_routers.get_verify_router(UserRead), tags=["Auth"])
-
-app.include_router(auth_routers.get_password_router(), tags=["Auth"])
+# app.include_router(
+#     auth_routers.get_register_router(UserRead, UserCreate), tags=["Auth"]
+# )
+#
+# app.include_router(auth_routers.get_verify_router(UserRead), tags=["Auth"])
+#
+# app.include_router(auth_routers.get_password_router(), tags=["Auth"])
