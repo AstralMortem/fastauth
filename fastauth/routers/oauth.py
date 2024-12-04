@@ -30,6 +30,7 @@ def get_oauth_router(
     self: FastAuth[UOAP, ID, RP, PP, OAP],
     oauth_client: BaseOAuth2,
     redirect_url: Optional[str] = None,
+    default_role: Optional[str] = None,
 ):
     prefix = self.config.OAUTH_ROUTER_DEFAULT_PREFIX + f"/{oauth_client.name.lower()}"
     router = APIRouter(prefix=prefix)
@@ -110,6 +111,7 @@ def get_oauth_router(
             oauth_schema,
             associate_by_email=self.config.OAUTH_ASSOCIATE_WITH_EMAIL,
             is_verified_by_default=self.config.OAUTH_IS_VERIFIED_DEFAULT,
+            default_role=default_role,
         )
         if not user.is_active:
             raise exceptions.OAuthUserNotActive()

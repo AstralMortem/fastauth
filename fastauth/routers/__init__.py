@@ -1,3 +1,4 @@
+from timeit import default_timer
 from typing import Type, Optional, List, Union, Tuple, Dict, Any
 
 from fastapi import FastAPI, APIRouter
@@ -39,8 +40,15 @@ class FastAuthRouter:
     ):
         return get_users_router(self._security, user_read, user_create, user_update)
 
-    def get_register_router(self, user_read: Type[UR_DTO], user_create: Type[UC_DTO]):
-        return get_register_router(self._security, user_read, user_create)
+    def get_register_router(
+        self,
+        user_read: Type[UR_DTO],
+        user_create: Type[UC_DTO],
+        default_role: Optional[str] = None,
+    ):
+        return get_register_router(
+            self._security, user_read, user_create, default_role=default_role
+        )
 
     def get_verify_router(self, user_read: Type[UR_DTO]):
         return get_verify_router(self._security, user_read)
@@ -83,41 +91,11 @@ class FastAuthRouter:
         )
 
     def get_oauth_router(
-        self, oauth_client: BaseOAuth2, redirect_url: Optional[str] = None
-    ):
-        return get_oauth_router(self._security, oauth_client, redirect_url)
-
-    def bundle(
         self,
-        app: Union[FastAPI, APIRouter],
-        schema_map: Dict[
-            str,
-            Optional[
-                Tuple[
-                    Optional[Type[DTO]],
-                    Optional[Type[DTO]],
-                    Optional[Type[DTO]],
-                    Optional[Dict[str, Any]],
-                ]
-            ],
-        ],
+        oauth_client: BaseOAuth2,
+        redirect_url: Optional[str] = None,
+        default_role: Optional[str] = None,
     ):
-        for schema, data in schema_map.items():
-            callable = self._get_callable_by_schema_name(schema)
-            tags = ["Auth"]
-            if schema == "users":
-                tags = ["Users"]
-            if schema == "roles":
-                tags = ["Roles"]
-            if schema == "permissions":
-                tags = ["Permissions"]
-            if data is not None:
-                app.include_router(callable(*data), tags=tags)
-            else:
-                app.include_router(callable(), tags=tags)
-
-    def _get_callable_by_schema_name(self, schema_name: str):
-        for i in dir(self):
-            if i.endswith("router") and i.split("_", 1)[1].startswith(schema_name):
-                return getattr(self, i)
-        return None
+        return get_oauth_router(
+            self._security, oauth_client, redirect_url, default_role
+        )

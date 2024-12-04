@@ -15,4 +15,4 @@ DependencyCallable = Callable[
     ],
 ]
 
-TokenType = Literal["access", "refresh"]
+TokenType = Literal["access", "refresh", "reset", "verify", "state"]

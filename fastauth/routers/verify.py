@@ -20,7 +20,7 @@ def get_verify_router(self: FastAuth, user_read: Type[UR_DTO]):
     async def verify_user(
         token: str = Body(..., embed=True), manager=self.AUTH_MANAGER
     ):
-        user = await manager.verify(token)
+        user = await manager.verify_user(token)
         return user
 
     return router

@@ -33,6 +33,8 @@ class UserNotExists(HTTPException):
 
 
 UserAlreadyExists = HTTPException(status.HTTP_403_FORBIDDEN, "User already exists")
+UserAlreadyVerified = HTTPException(status.HTTP_403_FORBIDDEN, "User already verified")
+UserInactive = HTTPException(status.HTTP_403_FORBIDDEN, "User is inactive")
 
 OAuthUnavailableEmail = HTTPException(
     status.HTTP_400_BAD_REQUEST, "OAuth is not available email"
