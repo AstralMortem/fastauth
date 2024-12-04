@@ -15,10 +15,10 @@ class UserProtocol(Protocol[ID]):
 
 UP = TypeVar("UP", bound=UserProtocol)
 
-#
-# class UserRBACProtocol(UserProtocol[ID], Generic[ID, RP]):
-#     role_id: Optional[int] = None
-#     role: Optional[RP] = None
-#
-#
-# URBACP = TypeVar("URBACP", bound=UserRBACProtocol)
+
+class UserRBACProtocol(UserProtocol[ID], Generic[ID, RP]):
+    role_id: Optional[int] = None
+    role: Optional[RP] = None
+
+
+URBACP = TypeVar("URBACP", bound=UserRBACProtocol)

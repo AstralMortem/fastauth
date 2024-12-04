@@ -77,9 +77,9 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP]):
                 raise exceptions.AccessDenied
 
             if roles or permissions:
-                # todo: implement role and permission check
-                pass
-
+                has_access = await manager.authorize_user(user, roles, permissions)
+                if not has_access and self.config.ENABLE_RBAC:
+                    raise exceptions.AccessDenied
             return user
 
         return _current_user

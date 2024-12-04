@@ -1,11 +1,11 @@
 from fastapi import HTTPException, status
-from typing import Generic, Optional, Any, Union, Type, Dict
+from typing import Generic, Optional, Any, Union, Type, Dict, List
 from jwt import PyJWTError
 from fastauth.config import FastAuthConfig
 from fastauth.repositories.oauth import AbstractOAuthRepository
 from fastauth.schemas import UU_DTO, UC_DTO, RC_DTO, OAR_DTO, OAC_DTO, RU_DTO, PC_DTO
 from fastauth.types import DependencyCallable
-from fastauth.models import UP, RP, PP, ID, OAP, UOAP
+from fastauth.models import UP, RP, PP, ID, OAP, UOAP, URBACP
 from fastauth.repositories import (
     AbstractUserRepository,
     AbstractRoleRepository,
@@ -336,6 +336,21 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
     async def delete_permission(self, permission_id: int):
         instance = await self.get_permission(permission_id)
         await self.perm_repo.delete(instance)
+
+    # =============== AUTH Operations ===================================
+    async def authorize_user(
+        self,
+        user: URBACP,
+        roles: Optional[List[str]] = None,
+        permissions: Optional[List[str]] = None,
+    ):
+        if roles is not None:
+            if user.role.name in roles:
+                return True
+        if permissions is not None:
+            if any(perm in user.role.permissions for perm in permissions):
+                return True
+        return False
 
 
 # class BaseAuthManager(Generic[UP, ID, RP, PP]):
