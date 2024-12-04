@@ -36,11 +36,17 @@ def get_auth_router(self: FastAuth):
         except NotImplementedError:
             return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-    @router.post(self.config.TOKEN_REFRESH_URL)
-    async def refresh(
-        manager=self.AUTH_MANAGER, token=self.REFRESH_REQUIRED, strategy=self.STRATEGY
-    ):
-        # todo: implement refresh
-        pass
+    if self.config.ENABLE_REFRESH_TOKEN:
+
+        @router.post(self.config.TOKEN_REFRESH_URL)
+        async def refresh(
+            manager=self.AUTH_MANAGER,
+            token=self.REFRESH_REQUIRED,
+            strategy=self.STRATEGY,
+        ):
+            user_id = manager.parse_user_id(token.sub)
+            user = await manager.get_user(user_id)
+            access_token = await strategy.write_token(user, "access")
+            return await self.TRANSPORT.get_login_response(access_token)
 
     return router

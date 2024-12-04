@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from fastauth.fastauth import FastAuth
 from fastauth.schemas import UR_DTO, UC_DTO, UU_DTO
-from typing import Type
+from typing import Type, Optional
 
 
 def get_users_router(
@@ -10,6 +10,7 @@ def get_users_router(
     user_read: Type[UR_DTO],
     user_create: Type[UC_DTO],
     user_update: Type[UU_DTO],
+    default_role: Optional[str] = None,
 ):
     router = APIRouter(prefix=self.config.USERS_ROUTER_DEFAULT_PREFIX)
 
@@ -51,19 +52,11 @@ def get_users_router(
         user_id = manager.parse_user_id(id)
         return await manager.get_user(user_id)
 
-    @router.get(
-        "/",
-        dependencies=[self.ADMIN_REQUIRED],
-    )
-    async def list_users(manager=self.AUTH_MANAGER):
-        # TODO: add list users
-        pass
-
     @router.post(
         "/",
         dependencies=[self.ADMIN_REQUIRED],
     )
     async def create_user(data: user_create, manager=self.AUTH_MANAGER):
-        return await manager.register_user(data, False)
+        return await manager.create_user(data, False, default_role=default_role)
 
     return router

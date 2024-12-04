@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from datetime import datetime, timezone
 from inspect import Signature, Parameter
 from typing import Type, cast, List, Optional
 from fastapi import Depends
@@ -43,7 +44,12 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP]):
 
             token_payload: TokenPayload = await strategy.read_token(token)
             if token_payload.type != token_type:
-                raise exceptions.InvalidToken(token_type)
+                raise exceptions.InvalidToken(token_type, f"provide {token_type} token")
+
+            if token_payload.exp and token_payload.exp > datetime.now(timezone.utc):
+                raise exceptions.InvalidToken(
+                    token_type, "Expired, please refresh token"
+                )
 
             return token_payload
 

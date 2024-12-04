@@ -38,9 +38,6 @@ class SQLAlchemyCRUDRepository(AbstractCRUDRepository[AUTH_MODEL, ID]):
     async def delete(self, model: AUTH_MODEL) -> None:
         await self.session.delete(model)
 
-    async def list(self):
-        raise NotImplementedError
-
 
 class SQLAlchemyUserRepository(
     AbstractUserRepository[UP, ID], SQLAlchemyCRUDRepository[UP, ID]

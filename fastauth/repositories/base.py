@@ -21,7 +21,3 @@ class AbstractCRUDRepository(Generic[AUTH_MODEL, ID], ABC):
     @abstractmethod
     async def delete(self, model: AUTH_MODEL) -> None:
         raise NotImplementedError
-
-    @abstractmethod
-    async def list(self, **kwargs) -> List[AUTH_MODEL]:
-        raise NotImplementedError

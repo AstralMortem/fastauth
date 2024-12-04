@@ -8,16 +8,17 @@ from fastauth.types import TokenType
 class FastAuthException(Exception):
     pass
 
+
 class InvalidAuthToken(FastAuthException):
     pass
 
 
-
 class InvalidToken(HTTPException):
-    def __init__(self, token_type: TokenType = "access"):
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid {token_type} token"
-        )
+    def __init__(self, token_type: TokenType = "access", extra: Optional[str] = None):
+        msg = f"Invalid {token_type} token"
+        if extra:
+            msg += f": {extra}"
+        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=msg)
 
 
 class UserNotExists(HTTPException):
