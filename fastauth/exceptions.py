@@ -8,13 +8,9 @@ from fastauth.types import TokenType
 class FastAuthException(Exception):
     pass
 
-
-class MissingAuthToken(FastAuthException):
-    pass
-
-
 class InvalidAuthToken(FastAuthException):
     pass
+
 
 
 class InvalidToken(HTTPException):

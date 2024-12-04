@@ -1,10 +1,9 @@
 from typing import Generic
-
 from jwt import PyJWTError
 from .base import BaseStrategy
 from fastauth.schemas import TokenResponse, TokenPayload
 from fastauth.utils.jwt_helper import decode_jwt, encode_jwt
-from fastauth.exceptions import InvalidAuthToken
+from fastauth import exceptions
 from fastauth.models import UP
 from fastauth.types import TokenType
 from fastauth.config import FastAuthConfig
@@ -23,7 +22,7 @@ class JWTStrategy(Generic[UP], BaseStrategy[UP]):
             )
             return TokenPayload.model_validate(token_payload)
         except PyJWTError as e:
-            InvalidAuthToken(f"Invalid token, cannot decode")
+            raise exceptions.InvalidToken
 
     async def write_token(self, user: UP, type: TokenType = "access", **extra_fields):
         payload = TokenPayload(

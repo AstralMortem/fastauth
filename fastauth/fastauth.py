@@ -1,9 +1,8 @@
 from collections.abc import Callable
 from inspect import Signature, Parameter
 from typing import Type, cast, List, Optional
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends
 from makefun import with_signature
-from sqlalchemy.util import await_only
 from typing_extensions import Generic
 
 from fastauth.backend.strategies import BaseStrategy
@@ -76,9 +75,9 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP]):
             if user.is_active != is_user_active or user.is_verified != is_user_verified:
                 raise exceptions.AccessDenied
 
-            if roles or permissions:
+            if (roles or permissions) and self.config.ENABLE_RBAC:
                 has_access = await manager.authorize_user(user, roles, permissions)
-                if not has_access and self.config.ENABLE_RBAC:
+                if not has_access:
                     raise exceptions.AccessDenied
             return user
 
