@@ -37,7 +37,7 @@ httpx-oauth = "^0.15.1"
 sqlalchemy = ["sqlalchemy", "aiosqlite", "asyncpg"]
 oauth2 = ["https-oauth"]
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
 pytest-asyncio = "^0.24.0"
 
