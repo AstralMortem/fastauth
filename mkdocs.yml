@@ -1,0 +1,62 @@
+site_name: FastAuth
+site_description: Ready-to-use customizable lib for FastAPI with Authentication, OAuth2, RBAC and User management, with rich ORM support
+repo_name: AstralMortem/fastauth
+repo_url: https://github.com/AstralMortem/fastauth
+
+
+theme:
+  name: 'material'
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: 'teal'
+      accent: 'cyan'
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark theme
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: 'teal'
+      accent: 'indigo'
+      background: 'blue gray'
+      toggle:
+        icon: material/weather-night
+        name: Switch to light theme
+  icon:
+    logo: material/shield-check
+  features:
+    - navigation.instant
+    - navigation.top
+    - navigation.sections
+    - search.suggest
+    - search.highlight
+    - content.code.annotate
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - attr_list
+  - tables
+  - def_list
+
+
+plugins:
+  - search
