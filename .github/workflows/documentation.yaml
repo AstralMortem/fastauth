@@ -37,7 +37,7 @@ jobs:
           poetry install --only=docs --no-root
 
       # build mkdocs
-      - name: Run pytest
+      - name: build mkdocs documentation
         run: |
           export PATH="$HOME/.local/bin:$PATH"
           poetry run mkdocs gh-deploy --force
