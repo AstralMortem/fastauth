@@ -1,12 +1,7 @@
-from http.client import responses
 from typing import Optional
-
 from fastapi.security import APIKeyCookie
 from fastapi import Response
-
 from .base import BaseTransport
-from fastauth.schemas import TokenPayload
-from fastauth.config import FastAuthConfig
 
 
 class CookieTransport(BaseTransport):

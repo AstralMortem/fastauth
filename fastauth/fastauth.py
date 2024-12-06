@@ -46,7 +46,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP]):
             if token_payload.type != token_type:
                 raise exceptions.InvalidToken(token_type, f"provide {token_type} token")
 
-            if token_payload.exp and token_payload.exp > datetime.now(timezone.utc):
+            if token_payload.exp and token_payload.exp < datetime.now(timezone.utc):
                 raise exceptions.InvalidToken(
                     token_type, "Expired, please refresh token"
                 )

@@ -4,7 +4,6 @@ import jwt
 from pydantic import SecretStr
 
 SecretType = Union[str, SecretStr]
-JWT_ALGORITHM = "HS256"
 
 
 def _get_secret_value(secret: SecretType) -> str:
@@ -17,7 +16,7 @@ def encode_jwt(
     data: dict,
     secret: SecretType,
     lifetime_seconds: Optional[int] = None,
-    algorithm: str = JWT_ALGORITHM,
+    algorithm: str = None,
 ) -> str:
     payload = data.copy()
     if lifetime_seconds:
@@ -30,7 +29,7 @@ def decode_jwt(
     encoded_jwt: str,
     secret: SecretType,
     audience: list[str],
-    algorithms: list[str] = [JWT_ALGORITHM],
+    algorithms: list[str] = None,
 ) -> dict[str, Any]:
     return jwt.decode(
         encoded_jwt,

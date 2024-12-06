@@ -12,7 +12,7 @@ from fastauth.config import FastAuthConfig
 class JWTStrategy(Generic[UP], BaseStrategy[UP]):
     _config: FastAuthConfig
 
-    async def read_token(self, token: TokenResponse) -> TokenPayload:
+    async def read_token(self, token: str) -> TokenPayload:
         try:
             token_payload = decode_jwt(
                 token,

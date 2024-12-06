@@ -1,8 +1,7 @@
 # FastAuth
 
----
 <p align="center">
-  <img src="/logo.png" alt="FastAuth">
+  <img src="https://raw.githubusercontent.com/AstralMortem/fastauth/master/logo.png?sanitize=true" alt="FastAuth">
 </p>
 
 <p align="center">
@@ -14,8 +13,8 @@
 Quickly add registration, authentication and **authorization** system to your [FastAPI]() project. **FastAuth** designed and
 to be customizable, and highly inspired by another Auth systems:
 
-  * [FastAPIUsers](https://github.com/fastapi-users/fastapi-users)
-  * [AuthX](https://github.com/yezz123/authx)
+  * [FastAPIUsers](https://github.com/fastapi-users/fastapi-users)(frankie567)
+  * [AuthX](https://github.com/yezz123/authx)(@yezz123)
 
 ---
 

@@ -1,8 +1,7 @@
 # FastAuth
-
 ---
 <p align="center">
-  <img src="../logo.svg" alt="FastAuth">
+  <img src="https://raw.githubusercontent.com/AstralMortem/fastauth/master/logo.png?sanitize=true" alt="FastAuth">
 </p>
 
 <p align="center">
