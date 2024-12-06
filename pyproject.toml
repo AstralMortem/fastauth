@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastauth"
-version = "0.0.1"
+version = "0.0.2"
 description = "Ready-to-use customizable lib for FastAPI with Authentication, OAuth2, RBAC and User management, with rich ORM support"
 readme = "README.md"
 license="MIT"
