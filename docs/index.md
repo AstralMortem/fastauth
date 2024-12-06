@@ -9,6 +9,8 @@
 </p>
 
 ---
+* Documentation: https://astralmortem.github.io/fastauth/
+* Source code: https://github.com/AstralMortem/fastauth
 
 Quickly add registration, authentication and **authorization** system to your [FastAPI]() project. **FastAuth** designed and
 to be customizable, and highly inspired by another Auth systems:
