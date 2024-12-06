@@ -32,7 +32,7 @@ jobs:
     - name: Install dependencies
       run: |
         export PATH="$HOME/.local/bin:$PATH"
-        poetry install
+        poetry install --only=test --no-root
 
     # Run pytest
     - name: Run pytest
