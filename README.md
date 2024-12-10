@@ -34,4 +34,3 @@ to be customizable, and highly inspired by another Auth systems:
     * [x] Extensible base user, roles, permissions models
     * [x] SQLAlchemy ORM async 
     * [ ] Beanie ODM
-    * 
