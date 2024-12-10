@@ -76,24 +76,3 @@ async def test_authenticated_raises_invalid_token_when_expired(
     assert exc_info.value.status_code == 401
     assert exc_info.value.detail.startswith("Invalid access token: Expired")
     mock_strategy.read_token.assert_called_once_with(token)
-
-
-# @pytest.mark.asyncio
-# async def test_current_user_raises_access_denied_when_user_not_active_or_verified(
-#     fast_auth, mock_auth_manager
-# ):
-#     # Arrange
-#     fast_auth.config.DEFAULT_CURRENT_USER_IS_ACTIVE = True
-#     fast_auth.config.DEFAULT_CURRENT_USER_IS_VERIFIED = True
-#     mock_token_payload = Mock(spec=TokenPayload, sub="user_id")
-#     mock_user = Mock(is_active=False, is_verified=False)
-#     mock_auth_manager.parse_user_id.return_value = "user_id"
-#     mock_auth_manager.get_user.return_value = mock_user
-#
-#     current_user = fast_auth.current_user()
-#
-#     # Act & Assert
-#     with pytest.raises(exceptions.AccessDenied):
-#         await current_user(
-#             token_payload=mock_token_payload, auth_manager=mock_auth_manager
-#         )
