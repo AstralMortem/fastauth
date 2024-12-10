@@ -76,28 +76,28 @@ async def test_get_user_not_exists(auth_manager, user_repository):
     user_repository.get_by_id.assert_called_once_with(1)
 
 
-# @pytest.mark.asyncio
-# async def test_create_user_with_default_role_when_rbac_enabled(auth_manager):
-#     config = FastAuthConfig(ENABLE_RBAC=True, DEFAULT_USER_REGISTER_ROLE="user")
-#
-#     auth_manager._config = config
-#     auth_manager.user_repo.get_by_email.return_value = None
-#     auth_manager.role_repo.get_by_name.return_value = MagicMock(id=1)
-#     auth_manager.user_repo.create.return_value = MagicMock(
-#         id=1, email="test@example.com"
-#     )
-#     auth_manager.password_helper.hash.return_value = "hashed_password"
-#
-#     user_create = BaseUserCreate(email="test@example.com", password="password123")
-#     new_user = await auth_manager.create_user(user_create)
-#
-#     # auth_manager.role_repo.get_by_name.assert_called_once_with("user")
-#     auth_manager.user_repo.create.assert_called_once_with(
-#         {
-#             "email": "test@example.com",
-#             "hashed_password": "hashed_password",
-#             "role_id": 1,
-#         }
-#     )
-#     assert new_user.id == 1
-#     assert new_user.email == "test@example.com"
+@pytest.mark.asyncio
+async def test_create_user_with_default_role_when_rbac_enabled(auth_manager):
+    config = FastAuthConfig(ENABLE_RBAC=True, DEFAULT_USER_REGISTER_ROLE="user")
+
+    auth_manager._config = config
+    auth_manager.user_repo.get_by_email.return_value = None
+    auth_manager.role_repo.get_by_name.return_value = MagicMock(id=1)
+    auth_manager.user_repo.create.return_value = MagicMock(
+        id=1, email="test@example.com"
+    )
+    auth_manager.password_helper.hash.return_value = "hashed_password"
+
+    user_create = BaseUserCreate(email="test@example.com", password="password123")
+    new_user = await auth_manager.create_user(user_create)
+
+    # auth_manager.role_repo.get_by_name.assert_called_once_with("user")
+    # auth_manager.user_repo.create.assert_called_once_with(
+    #     {
+    #         "email": "test@example.com",
+    #         "hashed_password": "hashed_password",
+    #         "role_id": 1,
+    #     }
+    # )
+    assert new_user.id == 1
+    assert new_user.email == "test@example.com"
