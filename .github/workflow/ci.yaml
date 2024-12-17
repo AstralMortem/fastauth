@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint-and-test:
+    name: Lint and Test FastAuth
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      # Step 3: Install Poetry
+      - name: Install Poetry
+        run: |
+          pip install poetry
+
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --no-root
+
+      # Step 5: Run Linting
+      - name: Run Linter (flake8)
+        run: |
+          poetry run ruff check fastauth
+
+      # Step 6: Run Tests with pytest
+      - name: Run Tests
+        run: |
+          poetry run pytest --cov=fastauth --cov-report=xml
+
+      # Step 7: Upload Coverage Report
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: true
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}

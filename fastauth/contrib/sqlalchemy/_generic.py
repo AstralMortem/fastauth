@@ -1,6 +1,6 @@
 import uuid
 from pydantic import UUID4
-from sqlalchemy import CHAR, TIMESTAMP, TypeDecorator
+from sqlalchemy import CHAR, TypeDecorator
 from sqlalchemy.dialects.postgresql import UUID
 
 
