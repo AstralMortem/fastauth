@@ -33,13 +33,14 @@ jobs:
           poetry install --no-interaction --no-root
 
       # Step 5: Run Linting
-      - name: Run Linter (flake8)
+      - name: Run Linter (Ruff)
         run: |
           poetry run ruff check fastauth
 
       # Step 6: Run Tests with pytest
       - name: Run Tests
         run: |
+          export PYTHONPATH=.
           poetry run pytest --cov=fastauth --cov-report=xml
 
       # Step 7: Upload Coverage Report
