@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           export PATH="$HOME/.local/bin:$PATH"
-          poetry install --only=docs --no-root
+          poetry install --no-interaction --no-root
 
       # build mkdocs
       - name: build mkdocs documentation
