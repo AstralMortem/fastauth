@@ -1,0 +1,3 @@
+# BaseAuthManager
+
+::: fastauth.manager.BaseAuthManager

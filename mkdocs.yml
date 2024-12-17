@@ -1,0 +1,120 @@
+site_name: FastAuth
+site_description: Ready-to-use customizable solution for FastAPI with Authentication, Authorization(RBAC) and OAuth2 support
+site_author: chaliukvladyslav@gmail.com (Vladyslav Chaliuk)
+copyright: "Copyright (c) 2024 to present Vladyslav Chaliuk and individual contributors"
+
+repo_url: https://github.com/AstralMortem/fastauth
+repo_name: AstralMortem/fastauth
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - abbr
+  - admonition
+  - pymdownx.details
+  - def_list
+  - meta
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+
+
+theme:
+  name: 'material'
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: 'teal'
+      accent: 'green'
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark theme
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: 'teal'
+      accent: 'deep purple'
+      background: 'blue gray'
+      toggle:
+        icon: material/weather-night
+        name: Switch to light theme
+  icon:
+    logo: material/shield-check
+  features:
+    - navigation.indexes
+    - navigation.path
+    - content.code.annotate
+    - content.code.select
+    - content.action.edit
+    - content.action.view
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - navigation.footer
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    - toc.integrate
+
+plugins:
+- search
+- mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_root_heading: true
+            show_if_no_docstring: true
+            preload_modules:
+            - httpx
+            - starlette
+            - fastapi
+            - pydantic_settings
+            inherited_members: true
+            members_order: source
+            separate_signature: true
+            unwrap_annotated: true
+            filters:
+            - '!^_'
+            heading_level: 3
+            merge_init_into_class: true
+            docstring_section_style: spacy
+            signature_crossrefs: true
+            allow_inspection: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+
+nav:
+  - FastAuth: index.md
+  - Get Started:
+      - Installation: begin/installation.md
+      - Configuration:
+          - begin/configuration/index.md
+          - Models: begin/configuration/models.md
+          - Repositories: begin/configuration/repositories.md
+          - Auth manager: begin/configuration/manager.md
+          - Config: begin/configuration/config.md
+          - Strategy: begin/configuration/strategy.md
+          - FastAuth: begin/configuration/fastauth.md
+  - Contrib:
+      - SQLAlchemy:
+          - contrib/sqlalchemy/index.md
+          - Models: contrib/sqlalchemy/models.md
+  - API:
+      - api/index.md
+      - Models: api/models.md
+      - Repositories: api/repositories.md
+      - BaseAuthManager: api/manager.md
+      - FastAuthConfig: api/config.md
+      - Strategy: api/strategy.md
+      - Transport: api/transport.md
+      - FastAuth: api/fastauth.md
+
