@@ -3,7 +3,7 @@ from fastauth.models import UP, ID, URPP, RP, PP
 from fastauth.config import FastAuthConfig
 from fastauth.repository import UserRepositoryProtocol, RolePermissionRepositoryProtocol
 from fastauth import exceptions
-from fastauth.schema import UC_S
+from fastauth.schema import UC_S, UU_S
 from fastauth.utils.password import PasswordHelperProtocol, PasswordHelper
 
 
@@ -66,13 +66,11 @@ class BaseAuthManager(Generic[UP, ID]):
         required_permissions_set = set(permissions)
 
         user_permissions = set(map(lambda perm: perm.codename, user.permissions))
-        role_permissions = set(
-            await self.rp_repo.get_permissions_by_role_name(user.role)
-        )
+        role_permissions = set(map(lambda perm: perm.codename, user.role.permissions))
         total_permissions = role_permissions | user_permissions
 
         check = bool(
-            user.role.name in required_roles_set
+            user.role.codename in required_roles_set
             or total_permissions & required_permissions_set
         )
         if check is False:
@@ -133,7 +131,7 @@ class BaseAuthManager(Generic[UP, ID]):
             raise exceptions.UserAlreadyExists
 
         valid_data = data.model_dump()
-        password = valid_data.get("password")
+        password = valid_data.pop("password")
         valid_data["hashed_password"] = self.password_helper.hash(password)
         if safe:
             valid_data.pop("is_active")
@@ -142,3 +140,8 @@ class BaseAuthManager(Generic[UP, ID]):
         user = await self.user_repo.create(valid_data)
 
         return user
+
+    async def patch(self, user_id: ID, data: Type[UU_S]):
+        instance = await self.get_user(user_id)
+        valid_data = data.model_dump()
+        return await self.user_repo.update(instance, valid_data)

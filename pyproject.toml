@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastapi-fastauth"
-version = "0.0.1"
+version = "0.0.2"
 description = "Ready-to-use customizable solution for FastAPI with Authentication, Authorization(RBAC) and OAuth2 support"
 license="MIT"
 authors = ["Vladyslav Chaliuk <chaliukvladyslav@gmail.com>"]
@@ -45,6 +45,7 @@ mkdocstrings-python = "^1.12.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.8.3"
+aiosqlite = "^0.20.0"
 
 [tool.poetry.extras]
 sqlalchemy = ["sqlalchemy", "asyncpg"]

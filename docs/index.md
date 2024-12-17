@@ -11,8 +11,10 @@
 ## About
 
 [![CI](https://github.com/AstralMortem/fastauth/actions/workflows/ci.yaml/badge.svg)](https://github.com/AstralMortem/fastauth/actions/workflows/ci.yaml)
-[![MkDocs](https://github.com/AstralMortem/fastauth/actions/workflows/docs.yaml/badge.svg)](https://github.com/AstralMortem/fastauth/actions/workflows/docs.yaml)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/AstralMortem/fastauth/docs.yaml?label=Docs)](https://astralmortem.github.io/fastauth/)
 [![codecov](https://codecov.io/github/AstralMortem/fastauth/graph/badge.svg?token=SI6ND9SIPU)](https://codecov.io/github/AstralMortem/fastauth)
+[![PyPI - Version](https://img.shields.io/pypi/v/fastapi-fastauth)](https://pypi.org/project/fastapi-fastauth/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/fastapi-fastauth)](https://pypi.org/project/fastapi-fastauth/)
 
 
 Here’s a ready-to-use, customizable solution for FastAPI with Authentication, Authorization (RBAC), and OAuth2 support. 
@@ -35,7 +37,7 @@ Highly inspired by [FastAPI Users](https://github.com/fastapi-users/fastapi-user
 * [x] User Management:
     * [x] User Model protocol
     * [x] Service-Repository pattern for flexible customization
-    * [ ] Popular ORM support:
-        * [ ] SQLAlchemy2.0 support
+    * [x] Popular ORM support:
+        * [x] SQLAlchemy2.0 support
         * [ ] Beanie
         * [ ] Tortoise ORM

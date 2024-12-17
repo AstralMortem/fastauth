@@ -54,7 +54,9 @@ class FastAuth(Generic[UP, ID], _FastAuthCallback):
                 token_payload.sub, is_active, is_verified
             )
             if roles is not None or permissions is not None:
-                user = await auth_manager.check_access(user, roles, permissions)
+                user = await auth_manager.check_access(
+                    user, roles or [], permissions or []
+                )
             return user
 
         return _user_required

@@ -36,7 +36,6 @@ def _get_token_from_request(
 
     @with_signature(Signature(parameters))
     async def _token_locations(*args, **kwargs):
-        print(kwargs)
         errors: List[exceptions.MissingToken] = []
         for location_name, token in kwargs.items():
             if token is not None:

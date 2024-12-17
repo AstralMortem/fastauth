@@ -1,5 +1,5 @@
 import uuid
-from typing import Generic, Optional, List
+from typing import Generic, Optional, List, TYPE_CHECKING
 from fastauth.models import ID
 from sqlalchemy.orm import Mapped, mapped_column, relationship, declared_attr
 from sqlalchemy import String, Boolean, ForeignKey
@@ -8,6 +8,9 @@ from ._generic import GUID
 
 class SQLAlchemyBaseUser(Generic[ID]):
     __tablename__ = "users"
+
+    if TYPE_CHECKING:
+        id: ID
 
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     username: Mapped[Optional[str]] = mapped_column(
@@ -27,9 +30,10 @@ class SQLAlchemyBaseRole:
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     codename: Mapped[str] = mapped_column(unique=True, index=True)
-    permissions: Mapped["SQLAlchemyBasePermission"] = relationship(
-        secondary="role_permission_rel"
-    )
+
+    @declared_attr
+    def permissions(self) -> Mapped[List["SQLAlchemyBasePermission"]]:
+        return relationship(secondary="role_permission_rel")
 
 
 class SQLAlchemyBasePermission:
@@ -58,6 +62,9 @@ class SQLAlchemyBaseUserPermissionRel(Generic[ID]):
 
 class SQLAlchemyBaseOAuthAccount(Generic[ID]):
     __tablename__ = "oauth_accounts"
+
+    if TYPE_CHECKING:
+        id: ID
     oauth_name: Mapped[str] = mapped_column(String(255), index=True)
     access_token: Mapped[str]
     expires_at: Mapped[Optional[int]]
@@ -78,11 +85,29 @@ class SQLAlchemyBaseOAuthAccountUUID(SQLAlchemyBaseOAuthAccount[uuid.UUID]):
 
 class UserRBACMixin:
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
-    role: Mapped[SQLAlchemyBaseRole] = relationship()
-    permissions: Mapped[List[SQLAlchemyBasePermission]] = relationship(
-        secondary="user_permission_rel"
-    )
+
+    @declared_attr
+    def role(self) -> Mapped["SQLAlchemyBaseRole"]:
+        return relationship()
+
+    @declared_attr
+    def permissions(self) -> Mapped[List["SQLAlchemyBasePermission"]]:
+        return relationship(secondary="user_permission_rel")
 
 
 class UserOAuthMixin:
     oauth_accounts: Mapped[SQLAlchemyBaseOAuthAccount] = relationship()
+
+
+__all__ = [
+    "UserRBACMixin",
+    "UserOAuthMixin",
+    "SQLAlchemyBaseUserUUID",
+    "SQLAlchemyBaseRole",
+    "SQLAlchemyBaseUser",
+    "SQLAlchemyBasePermission",
+    "SQLAlchemyBaseRolePermissionRel",
+    "SQLAlchemyBaseOAuthAccount",
+    "SQLAlchemyBaseUserPermissionRel",
+    "SQLAlchemyBaseOAuthAccountUUID",
+]

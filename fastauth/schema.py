@@ -50,3 +50,7 @@ UC_S = TypeVar("UC_S", bound=BaseUserCreate)
 
 class BaseUserUpdate(BaseSchema):
     email: Optional[str] = None
+    username: Optional[str] = None
+
+
+UU_S = TypeVar("UU_S", bound=BaseUserUpdate)

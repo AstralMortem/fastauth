@@ -47,6 +47,8 @@ class FastAuthConfig(BaseSettings):
     TOKEN_LOGOUT_URL: str = "/token/logout"
     TOKEN_REFRESH_URL: str = "/token/refresh"
 
+    ROUTER_USERS_DEFAULT_PREFIX: str = "/users"
+
     # AUTH SECTION
 
     USER_LOGIN_FIELDS: conlist(str, min_length=1) = ["email"]

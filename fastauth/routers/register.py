@@ -7,8 +7,10 @@ from fastauth.schema import UR_S, UC_S
 def get_register_router(
     security: FastAuth, user_read: Type[UR_S], user_create: Type[UC_S]
 ):
-    router = APIRouter()
+    router = APIRouter(prefix=security.config.ROUTER_AUTH_DEFAULT_PREFIX)
 
     @router.post("/register", response_model=user_read)
     async def register(data: user_create, auth_manager=security.AUTH_SERVICE):
         return await auth_manager.register(data)
+
+    return router

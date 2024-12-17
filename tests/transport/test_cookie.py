@@ -1,16 +1,19 @@
 import pytest
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import Mock, AsyncMock, MagicMock
 from fastapi.security import APIKeyCookie
+from fastapi.security.base import SecurityBase
 from fastapi import Request, Response
 
+from fastauth.schema import TokenResponse
 from fastauth.transport.cookie import CookieTransport
 
 
 @pytest.fixture
-async def security():
+def security():
     security = Mock()
     security.set_refresh_cookie = Mock(side_effect=lambda token, res: res)
     security.set_access_cookie = Mock(side_effect=lambda token, res: res)
+    security.remove_cookies = Mock(side_effect=lambda res: res)
 
     return security
 
@@ -30,68 +33,66 @@ def test_schema_token(token_type, cookie_transport):
 
     schema = cookie_transport.schema(request, refresh=bool(token_type == "refresh"))
 
+    assert isinstance(schema, SecurityBase)
     assert isinstance(schema, APIKeyCookie)
     assert schema.model.name == f"{token_type}_token"
     assert not schema.auto_error
 
 
-#
-# @pytest.mark.asyncio
-# async def test_login_response_with_custom_response(cookie_transport, security):
-#     """Test login_response with a custom response."""
-#     token_response = TokenResponse(
-#         access_token="abc123", refresh_token="refresh456", type="bearer"
-#     )
-#     response = Mock(spec=Response)
-#
-#     final_response = await cookie_transport.login_response(
-#         security=security, content=token_response, response=response
-#     )
-#
-#     security.set_access_cookie.assert_called_once_with("abc123", response)
-#     security.set_refresh_cookie.assert_called_once_with("refresh456", response)
-#     assert final_response is response
-#
-#
-# @pytest.mark.asyncio
-# async def test_login_response_with_default_response(cookie_transport, mock_security):
-#     """Test login_response without a custom response."""
-#     token_response = TokenResponse(
-#         access_token="abc123", refresh_token="refresh456", token_type="bearer"
-#     )
-#
-#     final_response = await cookie_transport.login_response(
-#         security=mock_security, content=token_response, response=None
-#     )
-#
-#     assert isinstance(final_response, Response)
-#     assert final_response.status_code == 204
-#     mock_security.set_access_cookie.assert_called_once_with("abc123", final_response)
-#     mock_security.set_refresh_cookie.assert_called_once_with(
-#         "refresh456", final_response
-#     )
-#
-#
-# @pytest.mark.asyncio
-# async def test_logout_response_with_custom_response(cookie_transport, mock_security):
-#     """Test logout_response with a custom response."""
-#     response = Mock(spec=Response)
-#
-#     final_response = await cookie_transport.logout_response(
-#         security=mock_security, response=response
-#     )
-#
-#     mock_security.remove_cookies.assert_called_once_with(response)
-#     assert final_response is response
-#
-#
-# @pytest.mark.asyncio
-# async def test_logout_response_with_default_response(cookie_transport, mock_security):
-#     """Test logout_response with a default response."""
-#     final_response = await cookie_transport.logout_response(
-#         security=mock_security, response=None
-#     )
-#
-#     assert isinstance(final_response, Response)
-#     assert final_response.status_code == 204
-#     mock_security.remove_cookies.assert_called_once_with(final_response)
+@pytest.mark.asyncio
+async def test_login_response_with_custom_response(cookie_transport, security):
+    """Test login_response with a custom response."""
+    token_response = TokenResponse(
+        access_token="abc123", refresh_token="refresh456", type="bearer"
+    )
+    response = Mock(spec=Response)
+
+    final_response = await cookie_transport.login_response(
+        security=security, content=token_response, response=response
+    )
+
+    security.set_access_cookie.assert_called_once_with("abc123", response)
+    security.set_refresh_cookie.assert_called_once_with("refresh456", response)
+    assert final_response is response
+
+
+@pytest.mark.asyncio
+async def test_login_response_with_default_response(cookie_transport, security):
+    """Test login_response without a custom response."""
+    token_response = TokenResponse(
+        access_token="abc123", refresh_token="refresh456", type="bearer"
+    )
+
+    final_response = await cookie_transport.login_response(
+        security=security, content=token_response, response=None
+    )
+
+    assert isinstance(final_response, Response)
+    assert final_response.status_code == 204
+    security.set_access_cookie.assert_called_once_with("abc123", final_response)
+    security.set_refresh_cookie.assert_called_once_with("refresh456", final_response)
+
+
+@pytest.mark.asyncio
+async def test_logout_response_with_custom_response(cookie_transport, security):
+    """Test logout_response with a custom response."""
+    response = Mock(spec=Response)
+
+    final_response = await cookie_transport.logout_response(
+        security=security, response=response
+    )
+
+    security.remove_cookies.assert_called_once_with(response)
+    assert final_response is response
+
+
+@pytest.mark.asyncio
+async def test_logout_response_with_default_response(cookie_transport, security):
+    """Test logout_response with a default response."""
+    final_response = await cookie_transport.logout_response(
+        security=security, response=None
+    )
+
+    assert isinstance(final_response, Response)
+    assert final_response.status_code == 204
+    security.remove_cookies.assert_called_once_with(final_response)
