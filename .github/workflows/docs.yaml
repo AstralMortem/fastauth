@@ -38,11 +38,9 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: |
-          export PATH="$HOME/.local/bin:$PATH"
           poetry install --no-interaction --no-root
 
       # build mkdocs
       - name: build mkdocs documentation
         run: |
-          export PATH="$HOME/.local/bin:$PATH"
           poetry run mkdocs gh-deploy --force
