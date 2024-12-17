@@ -12,7 +12,7 @@
 
 [![CI](https://github.com/AstralMortem/fastauth/actions/workflows/ci.yaml/badge.svg)](https://github.com/AstralMortem/fastauth/actions/workflows/ci.yaml)
 [![MkDocs](https://github.com/AstralMortem/fastauth/actions/workflows/docs.yaml/badge.svg)](https://github.com/AstralMortem/fastauth/actions/workflows/docs.yaml)
-
+[![codecov](https://codecov.io/github/AstralMortem/fastauth/graph/badge.svg?token=SI6ND9SIPU)](https://codecov.io/github/AstralMortem/fastauth)
 
 Here’s a ready-to-use, customizable solution for FastAPI with Authentication, Authorization (RBAC), and OAuth2 support. 
 This solution provides token based authentication(JWT, Redis, DB), role-based access control, and OAuth2 integration.
