@@ -1,0 +1,48 @@
+name: Build and Deploy MkDocs
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+
+jobs:
+  build:
+    if: "contains(github.event.head_commit.message, 'docs')"  # Trigger only if commit message includes 'docs'
+    name: Build and Deploy Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Git Credentials
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+      - uses: actions/cache@v4
+        with:
+          key: mkdocs-material-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-material-
+
+      # Install Poetry
+      - name: Install Poetry
+        run: |
+          pip install poetry
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          poetry install --only=docs --no-root
+
+      # build mkdocs
+      - name: build mkdocs documentation
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          poetry run mkdocs gh-deploy --force

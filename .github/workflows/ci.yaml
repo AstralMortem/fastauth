@@ -41,7 +41,7 @@ jobs:
       - name: Run Tests
         run: |
           export PYTHONPATH=.
-          poetry run pytest --cov --junitxml=junit.xml
+          poetry run pytest --cov --junitxml=junit.xml --cov-report=xml
 
       # Step 7: Upload Coverage Report
       - name: Upload Coverage to Codecov

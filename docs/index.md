@@ -10,7 +10,8 @@
 ---
 ## About
 
-![CI](https://github.com/AstralMortem/fastauth/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/AstralMortem/fastauth/actions/workflows/ci.yaml/badge.svg)](https://github.com/AstralMortem/fastauth/actions/workflows/ci.yaml)
+
 
 
 Here’s a ready-to-use, customizable solution for FastAPI with Authentication, Authorization (RBAC), and OAuth2 support. 
