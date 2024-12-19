@@ -1,4 +1,3 @@
-from typing import Optional, Dict
 from fastapi import HTTPException, status
 
 
@@ -11,7 +10,7 @@ class TokenRequired(HTTPException):
 
 
 class MissingToken(HTTPException):
-    def __init__(self, msg, headers: Optional[Dict[str, str]] = None):
+    def __init__(self, msg, headers: dict[str, str] | None = None):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=msg, headers=headers
         )
@@ -23,9 +22,7 @@ class InvalidToken(HTTPException):
 
 
 class ItemNotFound(HTTPException):
-    def __init__(
-        self, msg: Optional[str] = None, headers: Optional[Dict[str, str]] = None
-    ):
+    def __init__(self, msg: str | None = None, headers: dict[str, str] | None = None):
         text = "Item not found"
         if msg:
             text = msg

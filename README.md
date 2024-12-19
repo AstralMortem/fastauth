@@ -17,7 +17,7 @@
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/fastapi-fastauth)](https://pypi.org/project/fastapi-fastauth/)
 
 
-Here’s a ready-to-use, customizable solution for FastAPI with Authentication, Authorization (RBAC), and OAuth2 support. 
+Here’s a ready-to-use, customizable solution for FastAPI with Authentication, Authorization (RBAC), and OAuth2 support.
 This solution provides token based authentication(JWT, Redis, DB), role-based access control, and OAuth2 integration.
 Highly inspired by [FastAPI Users](https://github.com/fastapi-users/fastapi-users) and [AuthX](https://github.com/yezz123/authx/tree/main):
 

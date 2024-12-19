@@ -20,28 +20,23 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
-      # Step 3: Install Poetry
-      - name: Install Poetry
+      # Step 3: Install Hatch
+      - name: Install Hatch
         run: |
-          pip install poetry
+          python -m pip install --upgrade pip
+          pip install hatch
 
-      # Step 4: Install dependencies
-      - name: Install dependencies
+      # Step 4: Run linter
+      - name: Run linter
         run: |
-          poetry install --no-interaction --no-root
+          hatch fmt fastauth
 
-      # Step 5: Run Linting
-      - name: Run Linter (Ruff)
+      # Step 5: Run pytest
+      - name: Run Pytest
         run: |
-          poetry run ruff check fastauth
-
-      # Step 6: Run Tests with pytest
-      - name: Run Tests
-        run: |
-          export PYTHONPATH=.
-          poetry run pytest --cov=fastauth --junitxml=junit.xml --cov-report=xml
+          hatch test -c
 
       # Step 7: Upload Coverage Report
       - name: Upload Coverage to Codecov

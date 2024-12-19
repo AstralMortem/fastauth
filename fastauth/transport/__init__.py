@@ -1,18 +1,18 @@
 from inspect import Parameter, Signature
-from typing import Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING
+
+from fastapi import Depends, Request, Response
 from makefun import with_signature
-from fastauth.config import FastAuthConfig
-from fastapi import Request, Depends, Response
 
 from fastauth import exceptions
-
-from .base import TokenTransport
-from .bearer import BearerTransport
-from .cookie import CookieTransport
-from ..schema import TokenResponse
+from fastauth.config import FastAuthConfig
+from fastauth.schema import TokenResponse
+from fastauth.transport.bearer import BearerTransport
+from fastauth.transport.cookie import CookieTransport
 
 if TYPE_CHECKING:
     from fastauth.fastauth import FastAuth
+    from fastauth.transport.base import TokenTransport
 
 TRANSPORT_GETTER = {
     "headers": BearerTransport,
@@ -22,14 +22,14 @@ TRANSPORT_GETTER = {
 
 def _get_token_from_request(
     config: FastAuthConfig,
-    request: Optional[Request] = None,
+    request: Request | None = None,
     refresh: bool = False,
-    locations: Optional[List[str]] = None,
+    locations: list[str] | None = None,
 ):
     if locations is None:
         locations = config.TOKEN_LOCATIONS
 
-    parameters: List[Parameter] = []
+    parameters: list[Parameter] = []
     for location in locations:
         transport = TRANSPORT_GETTER[location]
         parameters.append(
@@ -42,7 +42,7 @@ def _get_token_from_request(
 
     @with_signature(Signature(parameters))
     async def _token_locations(*args, **kwargs):
-        errors: List[exceptions.MissingToken] = []
+        errors: list[exceptions.MissingToken] = []
         for location_name, token in kwargs.items():
             if token is not None:
                 return token
@@ -53,13 +53,14 @@ def _get_token_from_request(
             )
         if errors:
             raise exceptions.MissingToken(msg=[err.detail for err in errors])
-        raise exceptions.MissingToken(f"No token found in request from {locations}")
+        msg = f"No token found in request from {locations}"
+        raise exceptions.MissingToken(msg)
 
     return _token_locations
 
 
 async def get_login_response(
-    security: "FastAuth", tokens: TokenResponse, response: Optional[Response] = None
+    security: "FastAuth", tokens: TokenResponse, response: Response | None = None
 ):
     for location in security.config.TOKEN_LOCATIONS:
         transport_callable = TRANSPORT_GETTER[location]
@@ -72,9 +73,7 @@ async def get_login_response(
     return response
 
 
-async def get_logout_response(
-    security: "FastAuth", response: Optional[Response] = None
-):
+async def get_logout_response(security: "FastAuth", response: Response | None = None):
     for location in security.config.TOKEN_LOCATIONS:
         transport_callable = TRANSPORT_GETTER[location]
         transport: TokenTransport = transport_callable(security.config)

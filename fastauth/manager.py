@@ -1,17 +1,19 @@
-from typing import Optional, List, Generic, Type, Union, Any, Dict
+from typing import Any, Generic, Union
+
 from fastapi.security import OAuth2PasswordRequestForm
-from fastauth.config import FastAuthConfig
-from fastauth.repository import (
-    UserRepositoryProtocol,
-    RolePermissionRepositoryProtocol,
-    OAuthRepositoryProtocol,
-)
+
 from fastauth import exceptions
-from fastauth.schema import UC_S, TokenResponse, UU_S
+from fastauth.config import FastAuthConfig
+from fastauth.models import ID, OAP, PP, RP, UP, URPP
+from fastauth.repository import (
+    OAuthRepositoryProtocol,
+    RolePermissionRepositoryProtocol,
+    UserRepositoryProtocol,
+)
+from fastauth.schema import UC_S, UU_S, TokenResponse
 from fastauth.strategy.base import TokenStrategy
 from fastauth.types import DependencyCallable, TokenType
-from fastauth.utils.password import PasswordHelperProtocol, PasswordHelper
-from fastauth.models import UP, ID, RP, PP, OAP, URPP
+from fastauth.utils.password import PasswordHelper, PasswordHelperProtocol
 
 
 class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
@@ -23,15 +25,15 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         self,
         config: FastAuthConfig,
         user_repository: UserRepositoryProtocol[UP, ID],
-        rp_repository: Optional[RolePermissionRepositoryProtocol[RP, PP]] = None,
-        oauth_repository: Optional[OAuthRepositoryProtocol[OAP]] = None,
-        password_helper: PasswordHelperProtocol = PasswordHelper(),
+        rp_repository: RolePermissionRepositoryProtocol[RP, PP] | None = None,
+        oauth_repository: OAuthRepositoryProtocol[OAP] | None = None,
+        password_helper: PasswordHelperProtocol = None,
     ):
         self._config = config
         self.user_repo = user_repository
         self.rp_repo = rp_repository
         self.oauth_repo = oauth_repository
-        self.password_helper = password_helper
+        self.password_helper = password_helper or PasswordHelper()
 
     async def create_token(
         self,
@@ -39,10 +41,10 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         token_type: TokenType,
         strategy: TokenStrategy[UP, ID],
         *,
-        max_age: Optional[int] = None,
-        headers: Optional[str] = None,
-        extra_data: Optional[Dict[str, Any]] = None,
-        **kwargs
+        max_age: int | None = None,
+        headers: str | None = None,
+        extra_data: dict[str, Any] | None = None,
+        **kwargs,
     ):
         conf = kwargs.copy()
         if max_age:
@@ -92,17 +94,25 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
     async def check_access(
-        self, user: URPP, roles: List[str] = [], permissions: List[str] = []
+        self,
+        user: URPP,
+        roles: list[str] | None = None,
+        permissions: list[str] | None = None,
     ):
         """Check if user has at least one role or permission to access resource"""
+        if permissions is None:
+            permissions = []
+        if roles is None:
+            roles = []
         if self.rp_repo is None:
-            raise NotImplementedError("RolePermission repository not set")
+            msg = "RolePermission repository not set"
+            raise NotImplementedError(msg)
 
         required_roles_set = set(roles)
         required_permissions_set = set(permissions)
 
-        user_permissions = set(map(lambda perm: perm.codename, user.permissions))
-        role_permissions = set(map(lambda perm: perm.codename, user.role.permissions))
+        user_permissions = {perm.codename for perm in user.permissions}
+        role_permissions = {perm.codename for perm in user.role.permissions}
         total_permissions = role_permissions | user_permissions
 
         check = bool(
@@ -113,7 +123,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
             raise exceptions.AccessDenied
         return user
 
-    async def register(self, data: Type[UC_S], safe: bool = True):
+    async def register(self, data: type[UC_S], safe: bool = True):
         if isinstance(self._config.USER_LOGIN_FIELDS, str):
             if self._config.USER_LOGIN_FIELDS == "email":
                 user = await self.user_repo.get_by_email(data.email)
@@ -141,53 +151,47 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
             valid_data.pop("is_active")
             valid_data.pop("is_verified")
 
-        user = await self.user_repo.create(valid_data)
-
-        return user
+        return await self.user_repo.create(valid_data)
 
     # ============== USER CRUD ===========================================
 
     async def get_user(
         self,
         uid: str,
-        is_active: Optional[bool] = None,
-        is_verified: Optional[bool] = None,
+        is_active: bool | None = None,
+        is_verified: bool | None = None,
     ) -> UP:
         """Get user by uid and check if user is active or verified"""
         user_id: ID = self.parse_id(uid)
         user: UP = await self.user_repo.get_by_id(user_id)
         if user is None:
             raise exceptions.UserNotFound
-        user = await self._check_user_verification(user, is_active, is_verified)
-        return user
+        return await self._check_user_verification(user, is_active, is_verified)
 
     async def _check_user_verification(
         self,
         user: UP,
-        is_active: Optional[bool] = None,
-        is_verified: Optional[bool] = None,
+        is_active: bool | None = None,
+        is_verified: bool | None = None,
     ):
         """Check if user is active or verified"""
-        if is_active is not None:
-            if user.is_active != is_active:
-                raise exceptions.UserNotFound
-        if is_verified is not None:
-            if user.is_verified != is_verified:
-                raise exceptions.UserNotFound
+        if is_active is not None and user.is_active != is_active:
+            raise exceptions.UserNotFound
+        if is_verified is not None and user.is_verified != is_verified:
+            raise exceptions.UserNotFound
         return user
 
-    async def patch_user(self, user_id: ID, data: Type[UU_S]):
+    async def patch_user(self, user_id: ID, data: type[UU_S]):
         instance = await self.get_user(user_id)
         valid_data = data.model_dump()
         return self._update_user(instance, valid_data)
 
-    async def _update_user(self, user: UP, data: Dict[str, Any]):
+    async def _update_user(self, user: UP, data: dict[str, Any]):
         return await self.user_repo.update(user, data)
 
     async def delete_user(self, id: ID):
         instance = await self.get_user(id)
         await self.user_repo.delete(instance)
-        return None
 
 
 AuthManagerDependency = DependencyCallable[

@@ -8,7 +8,7 @@ pip install fastapi-fastauth
 ```
 When you install fastauth simply, you will have only authentication dependencies installed. It`s highly recommended to install ORM,
 for RBAC and User management support. FastAuth support some popular ORM implementations, if you dont see suitable ORM, you can
-implement your own support, see: 
+implement your own support, see:
 
 
 ### ORM Support
@@ -21,5 +21,5 @@ pip install "fastapi-fastauth[sqlalchemy]"
 ### OAuth2 Support
 To enable OAuth2 support use:
 ```
-pip install "fastapi-fastauth[oauth]"    
+pip install "fastapi-fastauth[oauth]"
 ```

@@ -1,8 +1,7 @@
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
 
 from fastauth.manager import BaseAuthManager
 from fastauth.repository import UserRepositoryProtocol
@@ -10,7 +9,6 @@ from fastauth.repository import UserRepositoryProtocol
 
 @pytest.fixture
 def router_security_instance(fastauth_instance, fastauth_manager, fastauth_strategy):
-
     @fastauth_instance.set_auth_callback
     async def auth_manager(config, **kwargs):
         user_repo = MagicMock(spec=UserRepositoryProtocol)

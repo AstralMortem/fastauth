@@ -1,10 +1,11 @@
-from .base import TokenTransport
-from fastapi.security import OAuth2PasswordBearer
 from typing import TYPE_CHECKING
+
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
-from typing import Optional
+from fastapi.security import OAuth2PasswordBearer
+
 from fastauth.schema import TokenResponse
+from fastauth.transport.base import TokenTransport
 
 if TYPE_CHECKING:
     from fastauth.fastauth import FastAuth
@@ -21,7 +22,7 @@ class BearerTransport(TokenTransport):
         self,
         security: "FastAuth",
         content: TokenResponse,
-        response: Optional[Response] = None,
+        response: Response | None = None,
     ) -> Response:
         content = content.model_dump()
         if response:
@@ -31,6 +32,6 @@ class BearerTransport(TokenTransport):
         return JSONResponse(content=content)
 
     async def logout_response(
-        self, security: "FastAuth", response: Optional[Response] = None
+        self, security: "FastAuth", response: Response | None = None
     ) -> Response:
         return response or Response(status_code=204)

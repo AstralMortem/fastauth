@@ -1,15 +1,13 @@
 import json
-from http.client import responses
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
-from fastapi import FastAPI, Depends
-from fastapi.security import OAuth2PasswordRequestForm
-from httpx import AsyncClient
+from fastapi import Depends
+from fastapi.testclient import TestClient
+
+from fastauth.fastauth import FastAuth
 from fastauth.routers.auth import get_auth_router
 from fastauth.schema import TokenResponse
-from fastauth.fastauth import FastAuth
-from fastapi.testclient import TestClient
 
 
 @pytest.fixture

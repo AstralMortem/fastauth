@@ -1,19 +1,17 @@
 import json
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, Mock
-from fastapi import Request, Response
-from pycparser.ply.yacc import token
+from fastapi import Request
 
+from fastauth import exceptions
+from fastauth.schema import TokenResponse
 from fastauth.transport import (
+    TRANSPORT_GETTER,
     _get_token_from_request,
     get_login_response,
     get_logout_response,
-    TRANSPORT_GETTER,
 )
-from fastauth.config import FastAuthConfig
-from fastauth.schema import TokenResponse
-from fastauth import exceptions
 
 
 @pytest.fixture
@@ -46,7 +44,6 @@ async def test_get_login_response(fastauth_instance):
 
 @pytest.mark.asyncio
 async def test_get_logout_response(fastauth_instance):
-
     response = await get_logout_response(fastauth_instance)
     assert response.body == b""
     assert 'access_token_cookie=""' in (str(response.headers.raw[0][1]))

@@ -2,9 +2,10 @@ import datetime
 from datetime import timedelta
 from unittest.mock import patch
 
+import pytest
+
 from fastauth.config import FastAuthConfig
 from fastauth.utils.jwt_helper import JWT
-import pytest
 
 
 @pytest.fixture
@@ -43,7 +44,6 @@ def test_decode_token(mock_decode, jwt_service, mock_config):
     assert decoded == mock_payload
 
 
-# Test for the encode_token method
 @pytest.mark.parametrize("token_type", ("access", "refresh"))
 @patch("jwt.encode")
 def test_encode_token(mock_encode, token_type, jwt_service, mock_config):

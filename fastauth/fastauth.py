@@ -1,29 +1,28 @@
 from inspect import Parameter, Signature
-from typing import Dict, Optional, List, Generic, Literal, Any
-from fastapi import Response, Depends
+from typing import Any, Generic, Literal
+
+from fastapi import Depends, Response
 from fastapi.openapi.models import SecurityBase
 from makefun import with_signature
-from fastauth.manager import BaseAuthManager
-from fastauth.strategy.base import TokenStrategy, TokenStrategyDependency
-from fastauth.types import TokenType
+
 from fastauth import exceptions
 from fastauth._callback import _FastAuthCallback
-from fastauth.transport import _get_token_from_request
 from fastauth.config import FastAuthConfig
+from fastauth.manager import AuthManagerDependency, BaseAuthManager
+from fastauth.models import ID, OAP, PP, RP, UP
+from fastauth.strategy.base import TokenStrategy, TokenStrategyDependency
+from fastauth.transport import _get_token_from_request
+from fastauth.types import TokenType
 from fastauth.utils.injector import injectable
-from fastauth.models import UP, ID, RP, PP, OAP
-
-from fastauth.manager import AuthManagerDependency
 
 
 class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
     def __init__(
         self,
         config: FastAuthConfig,
-        auth_manager_dependency: Optional[
-            AuthManagerDependency[UP, ID, RP, PP, OAP]
-        ] = None,
-        token_strategy_dependency: Optional[TokenStrategyDependency[UP, ID]] = None,
+        auth_manager_dependency: AuthManagerDependency[UP, ID, RP, PP, OAP]
+        | None = None,
+        token_strategy_dependency: TokenStrategyDependency[UP, ID] | None = None,
     ):
         self._config = config
         super().__init__()
@@ -49,9 +48,9 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
     async def create_access_token(
         self,
         uid: str,
-        max_age: Optional[int] = None,
-        headers: Optional[Dict[str, str]] = None,
-        extra: Optional[Dict[str, str]] = None,
+        max_age: int | None = None,
+        headers: dict[str, str] | None = None,
+        extra: dict[str, str] | None = None,
         **kwargs,
     ):
         async def _create_access_token(
@@ -73,9 +72,9 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
     async def create_refresh_token(
         self,
         uid: str,
-        max_age: Optional[int] = None,
-        headers: Optional[Dict[str, str]] = None,
-        extra: Optional[Dict[str, str]] = None,
+        max_age: int | None = None,
+        headers: dict[str, str] | None = None,
+        extra: dict[str, str] | None = None,
         **kwargs,
     ):
         async def _create_refresh_token(
@@ -96,10 +95,10 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
 
     def user_required(
         self,
-        roles: Optional[List[str]] = None,
-        permissions: Optional[List[str]] = None,
-        is_active: Optional[bool] = None,
-        is_verified: Optional[bool] = None,
+        roles: list[str] | None = None,
+        permissions: list[str] | None = None,
+        is_active: bool | None = None,
+        is_verified: bool | None = None,
     ):
         """Return callable with current user
         if roles or permissions is set, check if user has access to this resource
@@ -128,12 +127,12 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         self,
         token: str,
         response: Response,
-        max_age: Optional[int] = None,
-        path: Optional[str] = None,
-        domain: Optional[str] = None,
-        secure: Optional[bool] = None,
-        httponly: Optional[bool] = None,
-        samesite: Optional[Literal["lax", "strict", "none"]] = None,
+        max_age: int | None = None,
+        path: str | None = None,
+        domain: str | None = None,
+        secure: bool | None = None,
+        httponly: bool | None = None,
+        samesite: Literal["lax", "strict", "none"] | None = None,
     ):
         """Set access cookie to response"""
         return self._set_cookie(
@@ -152,12 +151,12 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         self,
         token: str,
         response: Response,
-        max_age: Optional[int] = None,
-        path: Optional[str] = None,
-        domain: Optional[str] = None,
-        secure: Optional[bool] = None,
-        httponly: Optional[bool] = None,
-        samesite: Optional[Literal["lax", "strict", "none"]] = None,
+        max_age: int | None = None,
+        path: str | None = None,
+        domain: str | None = None,
+        secure: bool | None = None,
+        httponly: bool | None = None,
+        samesite: Literal["lax", "strict", "none"] | None = None,
     ):
         """Set refresh cookie to response"""
         return self._set_cookie(
@@ -178,11 +177,11 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         token: str,
         key: str,
         max_age: int,
-        path: Optional[str] = None,
-        domain: Optional[str] = None,
-        secure: Optional[bool] = None,
-        httponly: Optional[bool] = None,
-        samesite: Optional[Literal["lax", "strict", "none"]] = None,
+        path: str | None = None,
+        domain: str | None = None,
+        secure: bool | None = None,
+        httponly: bool | None = None,
+        samesite: Literal["lax", "strict", "none"] | None = None,
     ):
         response.set_cookie(
             key=key,
@@ -200,11 +199,11 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
     def remove_cookies(
         self,
         response: Response,
-        path: Optional[str] = None,
-        domain: Optional[str] = None,
-        secure: Optional[bool] = None,
-        httponly: Optional[bool] = None,
-        samesite: Optional[Literal["lax", "strict", "none"]] = None,
+        path: str | None = None,
+        domain: str | None = None,
+        secure: bool | None = None,
+        httponly: bool | None = None,
+        samesite: Literal["lax", "strict", "none"] | None = None,
     ):
         """Remove all cookies set previously"""
         response = self._unset_cookie(
@@ -232,11 +231,11 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         self,
         key: str,
         response: Response,
-        path: Optional[str] = None,
-        domain: Optional[str] = None,
-        secure: Optional[bool] = None,
-        httponly: Optional[bool] = None,
-        samesite: Optional[Literal["lax", "strict", "none"]] = None,
+        path: str | None = None,
+        domain: str | None = None,
+        secure: bool | None = None,
+        httponly: bool | None = None,
+        samesite: Literal["lax", "strict", "none"] | None = None,
     ):
         response.delete_cookie(
             key,
@@ -264,7 +263,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         return _token_type_required
 
     def _token_parser_signature(self, refresh: bool = False):
-        parameters: List[Parameter] = [
+        parameters: list[Parameter] = [
             Parameter(
                 name="strategy",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
@@ -280,7 +279,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         return Signature(parameters)
 
     def _user_parser_signature(self):
-        parameters: List[Parameter] = [
+        parameters: list[Parameter] = [
             Parameter(
                 name="auth_manager",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
@@ -304,9 +303,9 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         return Depends(self._get_strategy_callback())
 
     @property
-    def ACCESS_TOKEN(self) -> Dict[str, Any]:
+    def ACCESS_TOKEN(self) -> dict[str, Any]:
         return Depends(self.access_token_required())
 
     @property
-    def REFRESH_TOKEN(self) -> Dict[str, Any]:
+    def REFRESH_TOKEN(self) -> dict[str, Any]:
         return Depends(self.refresh_token_required())

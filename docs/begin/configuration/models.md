@@ -12,8 +12,3 @@ Every model just follow convention, so if you need add own ORM model, you need j
  * [RoleProtocol](/api/models/#fastauth.models.RoleProtocol) - Role model protocol
  * [PermissionProtocol](/api/models/#fastauth.models.PermissionProtocol) - Permission model protocol
  * [OAuthProtocol](/api/models/#fastauth.models.OAuthProtocol) - OAuth model protocol
-
-
-
-
-

@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+from typing import Any, Generic
+
 from fastauth.config import FastAuthConfig
-from fastauth.models import UP, ID
-from typing import Generic, Any, Dict
-from fastauth.types import TokenType, DependencyCallable
+from fastauth.models import ID, UP
+from fastauth.types import DependencyCallable, TokenType
 
 
 class TokenStrategy(Generic[UP, ID], ABC):
@@ -10,7 +11,7 @@ class TokenStrategy(Generic[UP, ID], ABC):
         self._config = config
 
     @abstractmethod
-    async def read_token(self, token: str, **kwargs) -> Dict[str, Any]:
+    async def read_token(self, token: str, **kwargs) -> dict[str, Any]:
         """
         Decode token and try fetch User model
         :param token: Token string

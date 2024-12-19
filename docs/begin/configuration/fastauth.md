@@ -15,7 +15,7 @@ security = FastAuth(auth_config)
 async def auth_callback(config: FastAuthConfig):
     return AuthManager(
                 config,
-                UserRepository(), # User repository created erlier 
+                UserRepository(), # User repository created erlier
                 RBACRepository(), # Role and permissions repository
                 OAuthRepository() # OAuth repository
     )
@@ -36,7 +36,7 @@ async def token_strategy(config: FastAuthConfig):
     async def auth_callback(config: FastAuthConfig, session: AsyncSession = Depends(get_db)):
         return AuthManager(
                     config,
-                    UserRepository(session), 
+                    UserRepository(session),
                     RBACRepository(session),
                     OAuthRepository(session))
     ```
@@ -57,4 +57,4 @@ async def protected_route(token: TokenPayload = Depends(security.access_token_re
 
 You can see full examples for every supported ORM:
 
-* [SQLAlchemy](/contrib/sqlalchemy/index.md) 
+* [SQLAlchemy](/contrib/sqlalchemy/index.md)

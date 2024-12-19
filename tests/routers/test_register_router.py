@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi import Depends
@@ -6,7 +6,7 @@ from starlette.testclient import TestClient
 
 from fastauth.fastauth import FastAuth
 from fastauth.routers import get_register_router
-from fastauth.schema import UR_S, UC_S, BaseUserRead, BaseUserCreate
+from fastauth.schema import BaseUserCreate, BaseUserRead
 
 
 @pytest.fixture

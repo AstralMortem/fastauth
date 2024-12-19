@@ -25,16 +25,16 @@ To work with your DBMS, you'll need to install the corresponding asyncio driver.
         permissions: Mapped[List["Permission"]] = relationship(
             secondary="role_permission_rel", lazy="joined"
         )
-    
-    
+
+
     class Permission(models.SQLAlchemyBasePermission, Model):
         pass
-    
-    
+
+
     class RolePermission(models.SQLAlchemyBaseRolePermissionRel, Model):
         pass
-    
-    
+
+
     class UserPermission(models.SQLAlchemyBaseUserPermissionRel, Model):
         pass
     ```
@@ -42,11 +42,11 @@ To work with your DBMS, you'll need to install the corresponding asyncio driver.
     ```python
     from fastauth.contrib.sqlalchemy import repositories
     from models import User, Role, Permission
-    
+
     class UserRepository(repositories.SQLAlchemyUserRepository[User, uuid.UUID]):
         user_model = User
-    
-    
+
+
     class RBACRepository(repositories.SQLAlchemyRBACRepository[Role, Permission]):
         role_model = Role
         permission_model = Permission
@@ -60,7 +60,7 @@ To work with your DBMS, you'll need to install the corresponding asyncio driver.
     from fastauth.config import FastAuthConfig
     from fastauth.strategy import JWTStrategy
     from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-    
+
     engine = create_async_engine("sqlite+aiosqlite:///db.db")
     session = async_sessionmaker(engine)
 
@@ -75,7 +75,7 @@ To work with your DBMS, you'll need to install the corresponding asyncio driver.
     class AuthManager(BaseAuthManager[User, uuid.UUID]):
         def parse_id(self, pk: str):
             return uuid.UUID(pk)
-    
+
     security = FastAuth(config)
 
     @security.set_auth_callback

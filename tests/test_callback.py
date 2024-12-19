@@ -1,8 +1,9 @@
 import inspect
 from unittest.mock import MagicMock
+
 import pytest
 from fastapi import Depends
-from pydantic_settings import BaseSettings
+
 from fastauth.config import FastAuthConfig
 from fastauth.manager import BaseAuthManager
 from fastauth.strategy.base import TokenStrategy

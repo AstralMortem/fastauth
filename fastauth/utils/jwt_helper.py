@@ -1,6 +1,8 @@
-from datetime import timedelta, timezone, datetime
-from typing import Any, Dict, Optional
+from datetime import datetime, timedelta, timezone
+from typing import Any
+
 import jwt
+
 from fastauth.types import StringOrSequence, TokenType
 
 
@@ -10,7 +12,7 @@ class JWT:
         self._algorithm = algorithm
 
     def decode_token(
-        self, token: str, audience: Optional[StringOrSequence] = None, **kwargs
+        self, token: str, audience: StringOrSequence | None = None, **kwargs
     ):
         return jwt.decode(
             token,
@@ -22,11 +24,11 @@ class JWT:
 
     def encode_token(
         self,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         token_type: TokenType,
-        max_age: Optional[int] = None,
-        audience: Optional[StringOrSequence] = None,
-        headers: Optional[Dict[str, Any]] = None,
+        max_age: int | None = None,
+        audience: StringOrSequence | None = None,
+        headers: dict[str, Any] | None = None,
         **kwargs,
     ):
         payload["type"] = payload.get("type", token_type)

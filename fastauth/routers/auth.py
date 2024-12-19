@@ -1,6 +1,8 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+
 from fastauth.fastauth import FastAuth
 from fastauth.schema import TokenResponse
 from fastauth.transport import get_login_response, get_logout_response

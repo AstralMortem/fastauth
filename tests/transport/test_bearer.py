@@ -1,6 +1,6 @@
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, AsyncMock
-from fastapi.security import OAuth2PasswordBearer
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.security.base import SecurityBase
@@ -9,7 +9,7 @@ from starlette.datastructures import Headers
 from fastauth.schema import TokenResponse
 from fastauth.transport.bearer import (
     BearerTransport,
-)  # Replace with the actual module path
+)
 
 
 @pytest.fixture

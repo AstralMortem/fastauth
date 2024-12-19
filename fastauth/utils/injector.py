@@ -19,7 +19,7 @@ class DependencyError(Exception):
     """Exception raised for errors during dependency injection."""
 
 
-def injectable(  # noqa: C901
+def injectable(
     func: Callable[..., T] | Callable[..., Coroutine[Any, Any, T]] | None = None,
     *,
     use_cache: bool = True,
@@ -59,7 +59,7 @@ def injectable(  # noqa: C901
                     embed_body_fields=False,
                     dependency_cache=dependency_cache,
                 )
-                dep_kwargs = solved_result.values  # noqa: PD011
+                dep_kwargs = solved_result.values
                 if dependency_cache is not None:
                     dependency_cache.update(solved_result.dependency_cache)
 
@@ -76,7 +76,7 @@ def injectable(  # noqa: C901
                 raise ValueError(msg)
 
         @wraps(func)
-        async def async_call_with_solved_dependencies(*args: Any, **kwargs: Any) -> T:  # noqa: ANN401
+        async def async_call_with_solved_dependencies(*args: Any, **kwargs: Any) -> T:
             dependant = get_dependant(path="command", call=func)
             validate_dependant(dependant)
             deps, errors = await resolve_dependencies(dependant)
@@ -87,7 +87,7 @@ def injectable(  # noqa: C901
             )
 
         @wraps(func)
-        def sync_call_with_solved_dependencies(*args: Any, **kwargs: Any) -> T:  # noqa: ANN401
+        def sync_call_with_solved_dependencies(*args: Any, **kwargs: Any) -> T:
             dependant = get_dependant(path="command", call=func)
             validate_dependant(dependant)
             deps, errors = asyncio.run(resolve_dependencies(dependant))
@@ -102,5 +102,5 @@ def injectable(  # noqa: C901
         )
 
     if func is None:
-        return _impl  # type: ignore  # noqa: PGH003
+        return _impl  # type: ignore
     return _impl(func)

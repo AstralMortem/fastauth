@@ -1,9 +1,11 @@
-from typing import TYPE_CHECKING, Optional
-from fastapi.security import APIKeyCookie
-from fastapi.responses import Response
+from typing import TYPE_CHECKING
+
 from fastapi import Request
-from .base import TokenTransport
+from fastapi.responses import Response
+from fastapi.security import APIKeyCookie
+
 from fastauth.schema import TokenResponse
+from fastauth.transport.base import TokenTransport
 
 if TYPE_CHECKING:
     from fastauth.fastauth import FastAuth
@@ -23,7 +25,7 @@ class CookieTransport(TokenTransport):
         self,
         security: "FastAuth",
         content: TokenResponse,
-        response: Optional[Response] = None,
+        response: Response | None = None,
     ) -> Response:
         if response:
             response = security.set_access_cookie(content.access_token, response)
@@ -35,7 +37,7 @@ class CookieTransport(TokenTransport):
         return await self.login_response(security, content, response)
 
     async def logout_response(
-        self, security: "FastAuth", response: Optional[Response] = None
+        self, security: "FastAuth", response: Response | None = None
     ) -> Response:
         res = response or Response(status_code=204)
         return security.remove_cookies(res)

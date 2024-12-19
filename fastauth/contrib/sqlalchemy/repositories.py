@@ -1,29 +1,30 @@
-from sqlalchemy import select, or_
+from typing import Any, Generic
+
+from fastauth.models import ID, PP, RP, UP
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastauth.models import UP, ID, RP, PP
-from typing import Generic, Type, Optional, List, Any, Dict
 
 
 class SQLAlchemyUserRepository(Generic[UP, ID]):
-    user_model: Type[UP]
+    user_model: type[UP]
 
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_by_id(self, pk: ID) -> Optional[UP]:
+    async def get_by_id(self, pk: ID) -> UP | None:
         return await self.session.get(self.user_model, pk)
 
-    async def get_by_email(self, email: str) -> Optional[UP]:
+    async def get_by_email(self, email: str) -> UP | None:
         qs = select(self.user_model).where(self.user_model.email == email).limit(1)
         return await self.session.scalar(qs)
 
-    async def get_by_username(self, username: str) -> Optional[UP]:
+    async def get_by_username(self, username: str) -> UP | None:
         qs = (
             select(self.user_model).where(self.user_model.username == username).limit(1)
         )
         return await self.session.scalar(qs)
 
-    async def get_by_fields(self, username: str, fields: List[str]) -> Optional[UP]:
+    async def get_by_fields(self, username: str, fields: list[str]) -> UP | None:
         qs = (
             select(self.user_model)
             .filter(
@@ -33,18 +34,18 @@ class SQLAlchemyUserRepository(Generic[UP, ID]):
         )
         return await self.session.scalar(qs)
 
-    async def get_by_field(self, value: Any, field: str) -> Optional[UP]:
+    async def get_by_field(self, value: Any, field: str) -> UP | None:
         qs = select(self.user_model).filter_by(**{field: value}).limit(1)
         return await self.session.scalar(qs)
 
-    async def create(self, data: Dict[str, Any]) -> UP:
+    async def create(self, data: dict[str, Any]) -> UP:
         instance = self.user_model(**data)
         self.session.add(instance)
         await self.session.commit()
         await self.session.refresh(instance)
         return instance
 
-    async def update(self, user: UP, data: Dict[str, Any]) -> UP:
+    async def update(self, user: UP, data: dict[str, Any]) -> UP:
         for key, val in data.items():
             setattr(user, key, val)
         await self.session.commit()
@@ -53,13 +54,13 @@ class SQLAlchemyUserRepository(Generic[UP, ID]):
 
 
 class SQLAlchemyRBACRepository(Generic[RP, PP]):
-    role_model: Type[RP]
-    permission_model: Type[PP]
+    role_model: type[RP]
+    permission_model: type[PP]
 
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_permissions_by_role_name(self, role_name: str) -> List[str]:
+    async def get_permissions_by_role_name(self, role_name: str) -> list[str]:
         qs = (
             select(self.permission_model)
             .join(self.role_model.permissions)

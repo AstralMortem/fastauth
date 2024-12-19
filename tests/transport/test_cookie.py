@@ -1,8 +1,9 @@
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, AsyncMock, MagicMock
+from fastapi import Request, Response
 from fastapi.security import APIKeyCookie
 from fastapi.security.base import SecurityBase
-from fastapi import Request, Response
 
 from fastauth.schema import TokenResponse
 from fastauth.transport.cookie import CookieTransport

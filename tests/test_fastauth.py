@@ -1,11 +1,10 @@
+from datetime import datetime, timedelta, timezone
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import AsyncMock, Mock
 from fastapi import Response
-from datetime import datetime, timezone, timedelta
+
 from fastauth.types import TokenType
-from fastauth.config import FastAuthConfig
-from fastauth.fastauth import FastAuth
-from tests.conftest import fastauth_manager
 
 
 @pytest.mark.parametrize("token_type", ("access", "refresh"))

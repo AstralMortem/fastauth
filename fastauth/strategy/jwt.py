@@ -1,11 +1,13 @@
-from typing import Generic, Dict, Any
+from typing import Any, Generic
+
 from jwt import DecodeError
-from .base import TokenStrategy
-from fastauth.utils.jwt_helper import JWT
+
 from fastauth import exceptions
-from fastauth.models import UP, ID
 from fastauth.config import FastAuthConfig
+from fastauth.models import ID, UP
+from fastauth.strategy.base import TokenStrategy
 from fastauth.types import TokenType
+from fastauth.utils.jwt_helper import JWT
 
 
 class JWTStrategy(Generic[UP, ID], TokenStrategy[UP, ID]):
@@ -15,7 +17,7 @@ class JWTStrategy(Generic[UP, ID], TokenStrategy[UP, ID]):
         super().__init__(config)
         self.encoder = JWT(config.JWT_SECRET, config.JWT_ALGORITHM)
 
-    async def read_token(self, token: str, **kwargs) -> Dict[str, Any]:
+    async def read_token(self, token: str, **kwargs) -> dict[str, Any]:
         try:
             return self.encoder.decode_token(
                 token,
@@ -24,7 +26,8 @@ class JWTStrategy(Generic[UP, ID], TokenStrategy[UP, ID]):
             )
 
         except DecodeError as e:
-            raise exceptions.InvalidToken(f"Invalid JWT token: {e}")
+            msg = f"Invalid JWT token: {e}"
+            raise exceptions.InvalidToken(msg) from e
 
     async def write_token(self, user: UP, token_type: TokenType, **kwargs) -> str:
         payload = {

@@ -1,4 +1,4 @@
-from typing import Protocol, TypeVar, Generic, Optional, List, Dict, Any
+from typing import Any, Generic, Protocol, TypeVar
 
 ID = TypeVar("ID")
 
@@ -6,7 +6,7 @@ ID = TypeVar("ID")
 class UserProtocol(Protocol[ID]):
     id: ID
     email: str
-    username: Optional[str]
+    username: str | None
     hashed_password: str
     is_active: bool
     is_verified: bool
@@ -18,7 +18,7 @@ UP = TypeVar("UP", bound=UserProtocol)
 class PermissionProtocol(Protocol):
     id: int
     codename: str
-    detail: Optional[Dict[str, Any]]
+    detail: dict[str, Any] | None
 
 
 PP = TypeVar("PP", bound=PermissionProtocol)
@@ -27,7 +27,7 @@ PP = TypeVar("PP", bound=PermissionProtocol)
 class RoleProtocol(Protocol[PP]):
     id: int
     codename: str
-    permissions: List[PP]
+    permissions: list[PP]
 
 
 RP = TypeVar("RP", bound=RoleProtocol)
@@ -36,7 +36,7 @@ RP = TypeVar("RP", bound=RoleProtocol)
 class RBACUserProtocol(UserProtocol[ID], Generic[ID, RP, PP]):
     role_id: int
     role: RP
-    permissions: List[PP]
+    permissions: list[PP]
 
 
 URPP = TypeVar("URPP", bound=RBACUserProtocol)  # user-role-permission protocol
@@ -46,8 +46,8 @@ class OAuthProtocol(Protocol[ID]):
     id: ID
     oauth_name: str
     access_token: str
-    expires_at: Optional[int]
-    refresh_token: Optional[str]
+    expires_at: int | None
+    refresh_token: str | None
     account_id: str
     account_email: str
 
@@ -56,7 +56,7 @@ OAP = TypeVar("OAP", bound=OAuthProtocol)
 
 
 class OAuthUserProtocol(UserProtocol[ID], Generic[ID, OAP]):
-    oauth_accounts: List[OAP]
+    oauth_accounts: list[OAP]
 
 
 UOAP = TypeVar("UOAP", bound=OAuthUserProtocol)

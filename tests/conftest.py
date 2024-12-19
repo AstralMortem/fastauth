@@ -1,9 +1,10 @@
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from fastauth._callback import _FastAuthCallback
-from fastauth.fastauth import FastAuth
 from fastauth.config import FastAuthConfig
+from fastauth.fastauth import FastAuth
 from fastauth.manager import BaseAuthManager
 from fastauth.repository import UserRepositoryProtocol
 from fastauth.strategy.base import TokenStrategy

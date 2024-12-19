@@ -1,11 +1,11 @@
 from fastapi import APIRouter
-from typing import Type
+
 from fastauth.fastauth import FastAuth
-from fastauth.schema import UR_S, UC_S
+from fastauth.schema import UC_S, UR_S
 
 
 def get_register_router(
-    security: FastAuth, user_read: Type[UR_S], user_create: Type[UC_S]
+    security: FastAuth, user_read: type[UR_S], user_create: type[UC_S]
 ):
     router = APIRouter(prefix=security.config.ROUTER_AUTH_DEFAULT_PREFIX)
 

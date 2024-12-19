@@ -1,13 +1,15 @@
-from typing import (
-    Literal,
-    Union,
-    Sequence,
-    TypeVar,
+from collections.abc import (
+    AsyncGenerator,
+    AsyncIterator,
     Callable,
     Coroutine,
-    AsyncGenerator,
     Generator,
-    AsyncIterator,
+    Sequence,
+)
+from typing import (
+    Literal,
+    TypeVar,
+    Union,
 )
 
 TokenType = Literal["access", "refresh"]
@@ -19,11 +21,9 @@ RETURN_TYPE = TypeVar("RETURN_TYPE")
 
 DependencyCallable = Callable[
     ...,
-    Union[
-        RETURN_TYPE,
-        Coroutine[None, None, RETURN_TYPE],
-        AsyncGenerator[RETURN_TYPE, None],
-        Generator[RETURN_TYPE, None, None],
-        AsyncIterator[RETURN_TYPE],
-    ],
+    RETURN_TYPE
+    | Coroutine[None, None, RETURN_TYPE]
+    | AsyncGenerator[RETURN_TYPE, None]
+    | Generator[RETURN_TYPE, None, None]
+    | AsyncIterator[RETURN_TYPE],
 ]

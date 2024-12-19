@@ -1,7 +1,8 @@
 import pytest
 from fastapi import Depends
-from fastauth.utils.injector import injectable
 from fastapi.params import Depends as DependsClass
+
+from fastauth.utils.injector import injectable
 
 
 def mock_db_connection():

@@ -1,5 +1,7 @@
 import uuid
+
 from pydantic import UUID4
+
 from sqlalchemy import CHAR, TypeDecorator
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -29,11 +31,10 @@ class GUID(TypeDecorator):  # pragma: no cover
             return value
         elif dialect.name == "postgresql":
             return str(value)
+        elif not isinstance(value, uuid.UUID):
+            return str(uuid.UUID(value))
         else:
-            if not isinstance(value, uuid.UUID):
-                return str(uuid.UUID(value))
-            else:
-                return str(value)
+            return str(value)
 
     def process_result_value(self, value, dialect):
         if value is None:

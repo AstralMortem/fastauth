@@ -1,7 +1,8 @@
 import inspect
-from typing import Optional, List
+
 from fastapi.params import Depends as DependsClass
 from makefun import with_signature
+
 from fastauth.config import FastAuthConfig
 from fastauth.manager import AuthManagerDependency
 from fastauth.strategy.base import TokenStrategyDependency
@@ -12,8 +13,8 @@ class _FastAuthCallback:
     _config: FastAuthConfig
 
     def __init__(self):
-        self._auth_callback: Optional[AuthManagerDependency] = None
-        self._strategy_callback: Optional[TokenStrategyDependency] = None
+        self._auth_callback: AuthManagerDependency | None = None
+        self._strategy_callback: TokenStrategyDependency | None = None
 
     @property
     def _is_auth_callback_set(self) -> bool:
@@ -43,16 +44,18 @@ class _FastAuthCallback:
 
     def _get_strategy_callback(self) -> TokenStrategyDependency:
         if not self._is_token_strategy_callback_set:
-            raise AttributeError("Token strategy not set")
+            msg = "Token strategy not set"
+            raise AttributeError(msg)
         return self._strategy_callback
 
     def _get_auth_callback(self):
         if not self._is_auth_callback_set:
-            raise AttributeError("Auth callback not set")
+            msg = "Auth callback not set"
+            raise AttributeError(msg)
         return self._auth_callback
 
     def _build_new_signature(self, callable: DependencyCallable):
-        new_params: List[inspect.Parameter] = []
+        new_params: list[inspect.Parameter] = []
         inspected = inspect.signature(callable)
         for name, param in inspected.parameters.items():
             if isinstance(param.default, DependsClass):

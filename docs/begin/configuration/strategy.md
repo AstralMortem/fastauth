@@ -5,7 +5,7 @@ out the box:
 
 * [JWTStrategy](/api/strategy/#jwt-strategy) - JWT token strategy which use PyJWT library to encode and decode tokens
 
-If you want to customize and add your own strategy just inherit abstract [TokenStrategy](/api/strategy/#fastauth.strategy.base.TokenStrategy) 
+If you want to customize and add your own strategy just inherit abstract [TokenStrategy](/api/strategy/#fastauth.strategy.base.TokenStrategy)
 class from `fastauth.strategy.base` package, and override `write_token` and `read_token` methods:
 
 ```python

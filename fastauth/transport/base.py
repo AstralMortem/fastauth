@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Type, TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
+from fastapi import Request, Response
 from fastapi.security.base import SecurityBase
-from fastauth.config import FastAuthConfig
-from fastapi import Response, Request
 
+from fastauth.config import FastAuthConfig
 from fastauth.schema import TokenResponse
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ class TokenTransport(ABC):
         self._config = config
 
     @abstractmethod
-    def schema(self, request: Request, refresh: bool = False) -> Type[SecurityBase]:
+    def schema(self, request: Request, refresh: bool = False) -> type[SecurityBase]:
         raise NotImplementedError
 
     @abstractmethod
@@ -24,12 +24,12 @@ class TokenTransport(ABC):
         self,
         security: "FastAuth",
         content: TokenResponse,
-        response: Optional[Response] = None,
+        response: Response | None = None,
     ) -> Response:
         raise NotImplementedError
 
     @abstractmethod
     async def logout_response(
-        self, security: "FastAuth", response: Optional[Response] = None
+        self, security: "FastAuth", response: Response | None = None
     ) -> Response:
         raise NotImplementedError

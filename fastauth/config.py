@@ -1,14 +1,15 @@
-from typing import List, Literal, Optional, Union
-from pydantic_settings import BaseSettings
-from pydantic import Field, conlist
+from typing import Literal
 
-from fastauth.types import TokenLocations, StringOrSequence
+from pydantic import Field, conlist
+from pydantic_settings import BaseSettings
+
+from fastauth.types import StringOrSequence, TokenLocations
 
 
 class FastAuthConfig(BaseSettings):
     ACCESS_TOKEN_MAX_AGE: int = 60 * 60 * 24
     REFRESH_TOKEN_MAX_AGE: int = 60 * 60 * 24 * 20
-    TOKEN_LOCATIONS: List[TokenLocations] = ["headers", "cookies"]
+    TOKEN_LOCATIONS: list[TokenLocations] = ["headers", "cookies"]
     ENABLE_REFRESH_TOKEN: bool = True
 
     # JWT SECTION
@@ -35,7 +36,7 @@ class FastAuthConfig(BaseSettings):
         default_factory=lambda self: self.get("REFRESH_TOKEN_MAX_AGE")
     )
     COOKIE_DEFAULT_PATH: str = "/"
-    COOKIE_DEFAULT_DOMAIN: Optional[str] = None
+    COOKIE_DEFAULT_DOMAIN: str | None = None
     COOKIE_DEFAULT_SECURE: bool = False
     COOKIE_DEFAULT_HTTPONLY: bool = False
     COOKIE_DEFAULT_SAMESITE: Literal["lax", "strict", "none"] = "lax"
@@ -51,7 +52,7 @@ class FastAuthConfig(BaseSettings):
 
     # AUTH SECTION
 
-    USER_LOGIN_FIELDS: Union[str, conlist(str, min_length=1)] = ["email"]
+    USER_LOGIN_FIELDS: str | conlist(str, min_length=1) = ["email"]
     USER_FIELDS_IN_TOKEN: conlist(str, min_length=1) = [
         "email",
         "id",

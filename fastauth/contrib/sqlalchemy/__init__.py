@@ -1,18 +1,18 @@
-from .models import (
-    SQLAlchemyBaseRole,
-    SQLAlchemyBasePermission,
-    SQLAlchemyBaseUserUUID,
-    SQLAlchemyBaseUserPermissionRel,
-    SQLAlchemyBaseOAuthAccountUUID,
-    SQLAlchemyBaseUser,
+from sqlalchemy.models import (
     SQLAlchemyBaseOAuthAccount,
+    SQLAlchemyBaseOAuthAccountUUID,
+    SQLAlchemyBasePermission,
+    SQLAlchemyBaseRole,
     SQLAlchemyBaseRolePermissionRel,
+    SQLAlchemyBaseUser,
+    SQLAlchemyBaseUserPermissionRel,
+    SQLAlchemyBaseUserUUID,
     UserOAuthMixin,
     UserRBACMixin,
 )
-from .repositories import (
-    SQLAlchemyRBACRepository,
+from sqlalchemy.repositories import (
     SQLAlchemyOAuthRepository,
+    SQLAlchemyRBACRepository,
     SQLAlchemyUserRepository,
 )
 
