@@ -13,9 +13,11 @@ class CookieTransport(TokenTransport):
     def schema(self, request: Request, refresh: bool = False):
         if refresh:
             return APIKeyCookie(
-                name=self.config.COOKIE_REFRESH_TOKEN_NAME, auto_error=False
+                name=self._config.COOKIE_REFRESH_TOKEN_NAME, auto_error=False
             )
-        return APIKeyCookie(name=self.config.COOKIE_ACCESS_TOKEN_NAME, auto_error=False)
+        return APIKeyCookie(
+            name=self._config.COOKIE_ACCESS_TOKEN_NAME, auto_error=False
+        )
 
     async def login_response(
         self,

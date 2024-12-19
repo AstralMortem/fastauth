@@ -1,19 +1,6 @@
 from typing import Optional, Generic, TypeVar
-from datetime import datetime, timezone
-from pydantic import BaseModel, Field, ConfigDict
-
+from pydantic import BaseModel, ConfigDict
 from fastauth.models import ID
-from fastauth.types import TokenType, StringOrSequence
-
-
-class TokenPayload(BaseModel):
-    sub: str
-    type: TokenType = Field(default="access")
-    aud: Optional[StringOrSequence] = None
-    iat: Optional[datetime] = Field(default=datetime.now(timezone.utc))
-    exp: Optional[datetime] = None
-
-    model_config = ConfigDict(from_attributes=True, extra="allow")
 
 
 class TokenResponse(BaseModel):
@@ -41,8 +28,8 @@ class BaseUserCreate(BaseSchema):
     email: str
     username: Optional[str] = None
     password: str
-    is_active: bool
-    is_verified: bool
+    is_active: bool = True
+    is_verified: bool = False
 
 
 UC_S = TypeVar("UC_S", bound=BaseUserCreate)

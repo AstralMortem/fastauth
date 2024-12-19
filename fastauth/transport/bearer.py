@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class BearerTransport(TokenTransport):
     def schema(self, request: Request, refresh: bool = False) -> OAuth2PasswordBearer:
         token_url = (
-            f"{self.config.ROUTER_AUTH_DEFAULT_PREFIX}{self.config.TOKEN_LOGIN_URL}"
+            f"{self._config.ROUTER_AUTH_DEFAULT_PREFIX}{self._config.TOKEN_LOGIN_URL}"
         )
         return OAuth2PasswordBearer(token_url, auto_error=False)
 

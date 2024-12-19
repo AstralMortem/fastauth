@@ -1,11 +1,9 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from starlette.responses import JSONResponse
-
 from fastauth.fastauth import FastAuth
 from fastauth.schema import TokenResponse
-from fastauth.transport import TRANSPORT_GETTER
+from fastauth.transport import get_login_response, get_logout_response
 
 
 def get_auth_router(security: FastAuth):
@@ -15,84 +13,34 @@ def get_auth_router(security: FastAuth):
     @router.post(config.TOKEN_LOGIN_URL)
     async def login(
         credentials: Annotated[OAuth2PasswordRequestForm, Depends()],
-        auth_service=security.AUTH_SERVICE,
+        auth_service=security.AUTH_MANAGER,
+        strategy=security.TOKEN_STRATEGY,
     ):
-        user = await auth_service.authenticate(
-            credentials.username, credentials.password
-        )
-        user_data = {}
-        for field in config.USER_FIELDS_IN_TOKEN:
-            if user.__dict__.get(field, False):
-                user_data.update({field: user.__dict__[field]})
-
-        token_content = TokenResponse(
-            access_token=await security.create_access_token(
-                str(user.id), data=user_data
-            ),
-            refresh_token=(
-                await security.create_refresh_token(str(user.id))
-                if config.ENABLE_REFRESH_TOKEN
-                else None
-            ),
-        )
-        response = JSONResponse(None, status_code=200)
-
-        for location in config.TOKEN_LOCATIONS:
-            transport_cls = TRANSPORT_GETTER[location]
-            transport = transport_cls(config)
-            response = await transport.login_response(
-                security,
-                token_content,
-                response,
-            )
-
-        return response
+        tokens: TokenResponse = await auth_service.password_login(credentials, strategy)
+        return await get_login_response(security, tokens)
 
     @router.post(config.TOKEN_LOGOUT_URL, dependencies=[security.ACCESS_TOKEN])
     async def logout():
-        response = Response(None, status_code=204)
-
-        for location in config.TOKEN_LOCATIONS:
-            transport_cls = TRANSPORT_GETTER[location]
-            transport = transport_cls(config)
-            response = await transport.logout_response(
-                security,
-                response,
-            )
-
-        return response
+        return await get_logout_response(security)
 
     if config.ENABLE_REFRESH_TOKEN:
 
         @router.post(config.TOKEN_REFRESH_URL)
         async def refresh(
             token=security.REFRESH_TOKEN,
-            auth_service=security.AUTH_SERVICE,
+            auth_service=security.AUTH_MANAGER,
+            strategy=security.TOKEN_STRATEGY,
         ):
-            uid = token.sub
+            uid = token.get("sub")
             user = await auth_service.get_user(uid)
 
-            user_data = {}
-            for field in config.USER_FIELDS_IN_TOKEN:
-                if user.__dict__.get(field, False):
-                    user_data.update({field: user.__dict__[field]})
+            access_token = await strategy.write_token(user, "access")
+            refresh_token = await strategy.write_token(user, "refresh")
 
-            token_content = TokenResponse(
-                access_token=await security.create_access_token(uid, data=user_data),
-                refresh_token=(await security.create_refresh_token(uid)),
+            tokens = TokenResponse(
+                access_token=access_token, refresh_token=refresh_token
             )
 
-            response = JSONResponse(None, status_code=200)
-
-            for location in config.TOKEN_LOCATIONS:
-                transport_cls = TRANSPORT_GETTER[location]
-                transport = transport_cls(config)
-                response = await transport.login_response(
-                    security,
-                    token_content,
-                    response,
-                )
-
-            return response
+            return await get_login_response(security, tokens)
 
     return router

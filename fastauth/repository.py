@@ -1,5 +1,5 @@
-from typing import Generic, Optional, List, Any, Dict, Protocol
-from fastauth.models import ID, UP, RP, PP
+from typing import Optional, List, Any, Dict, Protocol
+from fastauth.models import ID, UP, RP, PP, OAP
 
 
 # Protocol as ORM DB adapter
@@ -27,7 +27,14 @@ class UserRepositoryProtocol(Protocol[UP, ID]):
     async def update(self, user: UP, data: Dict[str, Any]) -> UP:
         raise NotImplementedError
 
+    async def delete(self, user: UP) -> None:
+        raise NotImplementedError
 
-class RolePermissionRepositoryProtocol(Generic[RP, PP]):
+
+class RolePermissionRepositoryProtocol(Protocol[RP, PP]):
     async def get_permissions_by_role_name(self, role_name: str) -> List[str]:
         raise NotImplementedError
+
+
+class OAuthRepositoryProtocol(Protocol[OAP]):
+    pass

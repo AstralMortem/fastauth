@@ -8,6 +8,16 @@ readme = "README.md"
 packages = [
     { include = "fastauth" }
 ]
+documentation = "https://astralmortem.github.io/fastauth/"
+repository = "https://github.com/AstralMortem/fastauth"
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Pydantic :: 2",
+    "Framework :: FastAPI",
+    "Topic :: Security",
+    "Topic :: Internet :: WWW/HTTP :: Session"
+]
 
 keywords = [
     "FastAPI",
@@ -22,13 +32,13 @@ keywords = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 pydantic-settings = "^2.6.1"
 fastapi = "^0.115.6"
 pyjwt = "^2.10.1"
-uvicorn = "^0.32.1"
+uvicorn = "^0.34.0"
 makefun = "^1.15.6"
-python-multipart = "^0.0.19"
+python-multipart = "^0.0.20"
 pwdlib = {extras = ["argon2", "bcrypt"], version = "^0.2.1"}
 sqlalchemy = "^2.0.36"
 

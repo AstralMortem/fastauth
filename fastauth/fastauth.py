@@ -1,25 +1,38 @@
 from inspect import Parameter, Signature
-from typing import Dict, Optional, List, Generic, Literal
+from typing import Dict, Optional, List, Generic, Literal, Any
 from fastapi import Response, Depends
 from fastapi.openapi.models import SecurityBase
 from makefun import with_signature
-from datetime import datetime, timezone, timedelta
 from fastauth.manager import BaseAuthManager
-from fastauth.strategy.base import TokenStrategy
+from fastauth.strategy.base import TokenStrategy, TokenStrategyDependency
 from fastauth.types import TokenType
-from fastauth.schema import TokenPayload
 from fastauth import exceptions
 from fastauth._callback import _FastAuthCallback
 from fastauth.transport import _get_token_from_request
 from fastauth.config import FastAuthConfig
 from fastauth.utils.injector import injectable
-from fastauth.models import UP, ID
+from fastauth.models import UP, ID, RP, PP, OAP
+
+from fastauth.manager import AuthManagerDependency
 
 
-class FastAuth(Generic[UP, ID], _FastAuthCallback):
-    def __init__(self, config: FastAuthConfig):
+class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
+    def __init__(
+        self,
+        config: FastAuthConfig,
+        auth_manager_dependency: Optional[
+            AuthManagerDependency[UP, ID, RP, PP, OAP]
+        ] = None,
+        token_strategy_dependency: Optional[TokenStrategyDependency[UP, ID]] = None,
+    ):
         self._config = config
         super().__init__()
+
+        if auth_manager_dependency:
+            self.set_auth_callback(auth_manager_dependency)
+
+        if token_strategy_dependency:
+            self.set_token_strategy(token_strategy_dependency)
 
     @property
     def config(self):
@@ -32,6 +45,54 @@ class FastAuth(Generic[UP, ID], _FastAuthCallback):
     def refresh_token_required(self):
         """Return async callable which check if token payload has refresh type"""
         return self._token_required("refresh")
+
+    async def create_access_token(
+        self,
+        uid: str,
+        max_age: Optional[int] = None,
+        headers: Optional[Dict[str, str]] = None,
+        extra: Optional[Dict[str, str]] = None,
+        **kwargs,
+    ):
+        async def _create_access_token(
+            strategy=self.TOKEN_STRATEGY, manager=self.AUTH_MANAGER
+        ):
+            return await manager.create_token(
+                uid,
+                token_type="access",
+                strategy=strategy,
+                max_age=max_age or self._config.JWT_ACCESS_TOKEN_MAX_AGE,
+                headers=headers,
+                extra_data=extra,
+                **kwargs,
+            )
+
+        inject = injectable(_create_access_token)
+        return await inject()
+
+    async def create_refresh_token(
+        self,
+        uid: str,
+        max_age: Optional[int] = None,
+        headers: Optional[Dict[str, str]] = None,
+        extra: Optional[Dict[str, str]] = None,
+        **kwargs,
+    ):
+        async def _create_refresh_token(
+            strategy=self.TOKEN_STRATEGY, manager=self.AUTH_MANAGER
+        ):
+            return await manager.create_token(
+                uid,
+                token_type="refresh",
+                strategy=strategy,
+                max_age=max_age or self._config.JWT_REFRESH_TOKEN_MAX_AGE,
+                headers=headers,
+                extra_data=extra,
+                **kwargs,
+            )
+
+        inject = injectable(_create_refresh_token)
+        return await inject()
 
     def user_required(
         self,
@@ -47,11 +108,13 @@ class FastAuth(Generic[UP, ID], _FastAuthCallback):
 
         @with_signature(sig)
         async def _user_required(*args, **kwargs):
-            token_payload: TokenPayload = kwargs.get("token_payload")
-            auth_manager: BaseAuthManager[UP, ID] = kwargs.get("auth_manager")
+            token_payload = kwargs.get("token_payload")
+            auth_manager: BaseAuthManager[UP, ID, RP, PP, OAP] = kwargs.get(
+                "auth_manager"
+            )
 
             user: UP = await auth_manager.get_user(
-                token_payload.sub, is_active, is_verified
+                token_payload.get("sub"), is_active, is_verified
             )
             if roles is not None or permissions is not None:
                 user = await auth_manager.check_access(
@@ -60,32 +123,6 @@ class FastAuth(Generic[UP, ID], _FastAuthCallback):
             return user
 
         return _user_required
-
-    async def create_access_token(
-        self,
-        sub: str,
-        data: Optional[Dict[str, str]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        **kwargs,
-    ):
-        """Create access token from chosen strategy"""
-        injected = injectable(self._get_strategy_callback())
-        strategy = await injected()
-        payload = self._create_payload(sub=sub, type="access", data=data)
-        return await strategy.write_token(payload, **kwargs)
-
-    async def create_refresh_token(
-        self,
-        sub: str,
-        data: Optional[Dict[str, str]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        **kwargs,
-    ) -> str:
-        """Create refresh token from chosen strategy"""
-        injected = injectable(self._get_strategy_callback())
-        strategy = await injected()
-        payload = self._create_payload(sub=sub, type="refresh", data=data)
-        return await strategy.write_token(payload, **kwargs)
 
     def set_access_cookie(
         self,
@@ -211,37 +248,16 @@ class FastAuth(Generic[UP, ID], _FastAuthCallback):
         )
         return response
 
-    def _create_payload(
-        self,
-        sub: str,
-        type: TokenType,
-        data: Optional[Dict[str, str]] = None,
-    ):
-        token_payload = TokenPayload(
-            sub=sub,
-            type=type,
-            aud=self.config.JWT_DEFAULT_AUDIENCE,
-            exp=datetime.now(timezone.utc)
-            + timedelta(
-                seconds=(
-                    self.config.JWT_ACCESS_TOKEN_MAX_AGE
-                    if type == "access"
-                    else self.config.JWT_REFRESH_TOKEN_MAX_AGE
-                )
-            ),
-            **data if data else {},
-        )
-        return token_payload
-
     def _token_required(self, type: TokenType = "access"):
         sig = self._token_parser_signature(refresh=bool(type == "refresh"))
 
         @with_signature(sig)
         async def _token_type_required(*args, **kwargs):
-            strategy: TokenStrategy = kwargs.get("strategy")
+            strategy: TokenStrategy[UP, ID] = kwargs.get("strategy")
             token: str = kwargs.get("token")
-            token_payload: TokenPayload = await strategy.read_token(token)
-            if token_payload.type != type:
+
+            token_payload = await strategy.read_token(token)
+            if token_payload.get("type", None) != type:
                 raise exceptions.TokenRequired(type)
             return token_payload
 
@@ -279,7 +295,7 @@ class FastAuth(Generic[UP, ID], _FastAuthCallback):
         return Signature(parameters)
 
     @property
-    def AUTH_SERVICE(self) -> BaseAuthManager[UP, ID]:
+    def AUTH_MANAGER(self) -> BaseAuthManager:
         """Get auth service dependency"""
         return Depends(self._get_auth_callback())
 
@@ -288,9 +304,9 @@ class FastAuth(Generic[UP, ID], _FastAuthCallback):
         return Depends(self._get_strategy_callback())
 
     @property
-    def ACCESS_TOKEN(self) -> TokenPayload:
+    def ACCESS_TOKEN(self) -> Dict[str, Any]:
         return Depends(self.access_token_required())
 
     @property
-    def REFRESH_TOKEN(self) -> TokenPayload:
+    def REFRESH_TOKEN(self) -> Dict[str, Any]:
         return Depends(self.refresh_token_required())

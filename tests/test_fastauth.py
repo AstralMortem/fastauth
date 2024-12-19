@@ -3,35 +3,39 @@ from unittest.mock import AsyncMock, Mock
 from fastapi import Response
 from datetime import datetime, timezone, timedelta
 from fastauth.types import TokenType
-from fastauth.schema import TokenPayload
 from fastauth.config import FastAuthConfig
 from fastauth.fastauth import FastAuth
+from tests.conftest import fastauth_manager
 
 
 @pytest.mark.parametrize("token_type", ("access", "refresh"))
 @pytest.mark.asyncio
-async def test_create_token(token_type, fastauth_instance, fastauth_strategy):
+async def test_create_token(
+    token_type, fastauth_instance, fastauth_strategy, fastauth_manager
+):
     """Test access token creation."""
     token_string = f"mocked_{token_type}_token"
 
     fastauth_strategy.write_token = AsyncMock(return_value=token_string)
+    fastauth_manager.create_token = AsyncMock(return_value=token_string)
     fastauth_instance.set_token_strategy(AsyncMock(return_value=fastauth_strategy))
+    fastauth_instance.set_auth_callback(AsyncMock(return_value=fastauth_manager))
 
     if token_type == "access":
         token = await fastauth_instance.create_access_token(
-            sub="user123", data={"scope": "read"}, headers=None
+            uid="user123", extra={"scope": "read"}
         )
     else:
         token = await fastauth_instance.create_refresh_token(
-            sub="user123", data={"scope": "read"}, headers=None
+            uid="user123", extra={"scope": "read"}
         )
 
     assert token == token_string
-    fastauth_strategy.write_token.assert_called_once()
-    payload = fastauth_strategy.write_token.call_args[0][0]
-    assert payload.sub == "user123"
-    assert payload.type == token_type
-    # assert "scope" in payload
+    fastauth_manager.create_token.assert_called_once()
+    args = fastauth_manager.create_token.call_args
+    assert args[0][0] == "user123"
+    assert args[1]["token_type"] == token_type
+    assert args[1]["extra_data"] == {"scope": "read"}
 
 
 @pytest.mark.parametrize("token_type", ("access", "refresh"))
@@ -71,12 +75,12 @@ async def test_token_required(
     token_type: TokenType, fastauth_instance, fastauth_strategy
 ):
     """Test access token required functionality."""
-    token_payload = TokenPayload(
-        sub="user123",
-        type=token_type,
-        aud="test-audience",
-        exp=datetime.now(timezone.utc) + timedelta(seconds=3600),
-    )
+    token_payload = {
+        "sub": "user123",
+        "type": token_type,
+        "aud": "test-audience",
+        "exp": datetime.now(timezone.utc) + timedelta(seconds=3600),
+    }
     fastauth_strategy.read_token = AsyncMock(return_value=token_payload)
     fastauth_instance.set_token_strategy(AsyncMock(return_value=fastauth_strategy))
 
@@ -98,12 +102,12 @@ async def test_user_required(
 
     dependency = fastauth_instance.user_required(roles=["admin"], permissions=["write"])
     result = await dependency(
-        token_payload=TokenPayload(
-            sub="user123",
-            type="access",
-            aud="test-audience",
-            exp=datetime.now(timezone.utc),
-        ),
+        token_payload={
+            "sub": "user123",
+            "type": "access",
+            "aud": "test-audience",
+            "exp": datetime.now(timezone.utc),
+        },
         auth_manager=fastauth_manager,
     )
 
@@ -112,18 +116,3 @@ async def test_user_required(
     fastauth_manager.check_access.assert_called_once_with(
         fastauth_user, ["admin"], ["write"]
     )
-
-
-def test_create_payload(fastauth_instance, fastauth_config):
-    """Test creating a token payload."""
-    sub = "user1"
-    data = {"custom": "value"}
-    token_payload = fastauth_instance._create_payload(sub=sub, type="access", data=data)
-
-    assert isinstance(token_payload, TokenPayload)
-    assert token_payload.sub == sub
-    assert token_payload.type == "access"
-    assert token_payload.aud == fastauth_config.JWT_DEFAULT_AUDIENCE
-    assert token_payload.custom == "value"
-    assert isinstance(token_payload.exp, datetime)
-    assert token_payload.exp > datetime.now(timezone.utc)

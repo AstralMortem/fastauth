@@ -15,10 +15,6 @@ class TokenTransport(ABC):
     def __init__(self, config: FastAuthConfig):
         self._config = config
 
-    @property
-    def config(self):
-        return self._config
-
     @abstractmethod
     def schema(self, request: Request, refresh: bool = False) -> Type[SecurityBase]:
         raise NotImplementedError

@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Union
 from pydantic_settings import BaseSettings
 from pydantic import Field, conlist
 
@@ -51,7 +51,7 @@ class FastAuthConfig(BaseSettings):
 
     # AUTH SECTION
 
-    USER_LOGIN_FIELDS: conlist(str, min_length=1) = ["email"]
+    USER_LOGIN_FIELDS: Union[str, conlist(str, min_length=1)] = ["email"]
     USER_FIELDS_IN_TOKEN: conlist(str, min_length=1) = [
         "email",
         "id",

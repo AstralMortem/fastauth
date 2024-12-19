@@ -19,7 +19,7 @@ def mock_config():
 
 @pytest.fixture
 def jwt_service(mock_config):
-    return JWT(config=mock_config)
+    return JWT(secretkey=mock_config.JWT_SECRET, algorithm=mock_config.JWT_ALGORITHM)
 
 
 # Test for the decode_token method
@@ -44,55 +44,9 @@ def test_decode_token(mock_decode, jwt_service, mock_config):
 
 
 # Test for the encode_token method
+@pytest.mark.parametrize("token_type", ("access", "refresh"))
 @patch("jwt.encode")
-def test_encode_token(mock_encode, jwt_service, mock_config):
-    # Arrange
-    payload = {"sub": "user1", "iat": datetime.datetime.now(datetime.timezone.utc)}
-    max_age = 3600
-    expected_token = "encoded_token"
-    mock_encode.return_value = expected_token
-
-    # Act
-    token = jwt_service.encode_token(payload, max_age=max_age)
-
-    # Assert
-    mock_encode.assert_called_once_with(
-        {
-            **payload,
-            "aud": mock_config.JWT_DEFAULT_AUDIENCE,
-            "exp": payload["iat"] + timedelta(seconds=max_age),
-        },
-        key=mock_config.JWT_SECRET,
-        algorithm=mock_config.JWT_ALGORITHM,
-        headers=None,
-    )
-    assert token == expected_token
-
-
-# Test for missing exp field in encode_token
-@patch("jwt.encode")
-def test_encode_token_missing_exp(mock_encode, jwt_service, mock_config):
-    # Arrange
-    payload = {"sub": "user1", "iat": datetime.datetime.now(datetime.timezone.utc)}
-    max_age = 3600
-    expected_token = "encoded_token"
-    mock_encode.return_value = expected_token
-
-    # Act
-    token = jwt_service.encode_token(payload, max_age=max_age)
-
-    # Assert
-    # Assert that exp field is added based on max_age
-    assert "exp" in mock_encode.call_args[0][0]
-    assert mock_encode.call_args[0][0]["exp"] == payload["iat"] + timedelta(
-        seconds=max_age
-    )
-    assert token == expected_token
-
-
-# Test if audience is added to encode_token if not present in payload
-@patch("jwt.encode")
-def test_encode_token_audience(mock_encode, jwt_service, mock_config):
+def test_encode_token(mock_encode, token_type, jwt_service, mock_config):
     # Arrange
     payload = {"sub": "user1", "iat": datetime.datetime.now(datetime.timezone.utc)}
     max_age = 3600
@@ -101,12 +55,70 @@ def test_encode_token_audience(mock_encode, jwt_service, mock_config):
 
     # Act
     token = jwt_service.encode_token(
-        payload, max_age=max_age, audience="custom_audience"
+        payload, token_type=token_type, max_age=max_age, audience="test_audience"
+    )
+
+    # Assert
+    mock_encode.assert_called_once_with(
+        {
+            **payload,
+            "type": token_type,
+            "aud": "test_audience",
+            "exp": payload["iat"] + timedelta(seconds=max_age),
+        },
+        key=jwt_service._secretkey,
+        algorithm=jwt_service._algorithm,
+        headers=None,
+    )
+    assert token == expected_token
+
+
+@pytest.mark.parametrize("token_type", ("access", "refresh"))
+# Test for missing exp field in encode_token
+@patch("jwt.encode")
+def test_encode_token_missing_exp(mock_encode, token_type, jwt_service, mock_config):
+    # Arrange
+    payload = {
+        "sub": "user1",
+        "iat": datetime.datetime.now(datetime.timezone.utc),
+        "type": token_type,
+    }
+    max_age = 3600
+    expected_token = "encoded_token"
+    mock_encode.return_value = expected_token
+
+    # Act
+    token = jwt_service.encode_token(payload, token_type=token_type, max_age=max_age)
+
+    # Assert
+    # Assert that exp field is added based on max_age
+    assert "exp" in mock_encode.call_args[0][0]
+    assert mock_encode.call_args[0][0]["exp"] == payload["iat"] + timedelta(
+        seconds=max_age
+    )
+    assert mock_encode.call_args[0][0]["type"] == token_type
+    assert token == expected_token
+
+
+@pytest.mark.parametrize("token_type", ("access", "refresh"))
+# Test if audience is added to encode_token if not present in payload
+@patch("jwt.encode")
+def test_encode_token_audience(mock_encode, token_type, jwt_service, mock_config):
+    # Arrange
+    payload = {"sub": "user1", "iat": datetime.datetime.now(datetime.timezone.utc)}
+    max_age = 3600
+    expected_token = "encoded_token"
+    mock_encode.return_value = expected_token
+
+    # Act
+    token = jwt_service.encode_token(
+        payload, token_type=token_type, max_age=max_age, audience="custom_audience"
     )
 
     # Assert
     assert "aud" in mock_encode.call_args[0][0]
     assert mock_encode.call_args[0][0]["aud"] == "custom_audience"
+    assert mock_encode.call_args[0][0]["type"] == token_type
     assert token == expected_token
 
 
