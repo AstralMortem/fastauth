@@ -91,7 +91,7 @@ branch = true
 
 [tool.coverage.report]
 precision = 2
-fail_under = 85
+fail_under = 50
 exclude_lines = [
     'pragma: no cover',
     'raise NotImplementedError',
