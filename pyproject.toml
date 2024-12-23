@@ -137,6 +137,6 @@ extra-dependencies = [
 
 [tool.hatch.envs.hatch-test.scripts]
 run = "pytest{env:HATCH_TEST_ARGS:} {args}"
-run-cov = "coverage run -m pytest{env:HATCH_TEST_ARGS:} {args} --junitxml=junit.xml && coverage xml"
+run-cov = "coverage run -m pytest{env:HATCH_TEST_ARGS:} {args} --junitxml=junit.xml"
 cov-combine = "coverage combine"
-cov-report = "coverage report"
+cov-report = "coverage report && coverage xml"
