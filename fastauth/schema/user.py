@@ -1,18 +1,8 @@
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict
-
 from fastauth.models import ID
 
-
-class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str | None = None
-    type: str = "bearer"
-
-
-class BaseSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+from .base import BaseSchema
 
 
 class BaseUserRead(BaseSchema, Generic[ID]):
