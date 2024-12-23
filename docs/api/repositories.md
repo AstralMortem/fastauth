@@ -1,7 +1,7 @@
 # Repositories Protocols
 
-::: fastauth.repository.UserRepositoryProtocol
+::: fastauth.repository.AbstractUserRepository
 
 ---
 
-::: fastauth.repository.RolePermissionRepositoryProtocol
+::: fastauth.repository.AbstractRolePermissionRepository

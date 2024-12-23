@@ -10,6 +10,8 @@ from examples.sqlaclhemy_full.models import Model
 from examples.sqlaclhemy_full.schema import ROUTER_SCHEMA, UserRead
 from fastauth.routers import FastAuthRouter
 
+security.create_access_token()
+
 
 @asynccontextmanager
 async def init_db(app: FastAPI):

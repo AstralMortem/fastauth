@@ -8,6 +8,7 @@ from fastauth.repository import AbstractUserRepository
 
 pytest.skip("Skip")
 
+
 @pytest.fixture
 def router_security_instance(fastauth_instance, fastauth_manager, fastauth_strategy):
     @fastauth_instance.set_auth_callback

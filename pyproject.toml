@@ -79,6 +79,7 @@ dev-dependencies = [
     "aiosqlite",
 ]
 
+
 [tool.ruff]
 exclude = [
     "tests",
@@ -123,6 +124,15 @@ exclude_lines = [
 strict = true
 warn_return_any = false
 no_implicit_optional = false
+
+[dependency-groups]
+docs = [
+    "mkdocs-material>=9.5.49",
+    "mkdocs>=1.6.1",
+]
+dev = [
+    "mkdocstrings-python>=1.12.2",
+]
 
 
 

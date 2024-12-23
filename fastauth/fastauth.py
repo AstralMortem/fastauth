@@ -1,5 +1,5 @@
 from inspect import Parameter, Signature
-from typing import Any, Generic, Literal
+from typing import Any, Callable, Coroutine, Dict, Generic, Literal
 
 from fastapi import Depends, Response
 from fastapi.openapi.models import SecurityBase
@@ -9,7 +9,7 @@ from fastauth import exceptions
 from fastauth._callback import _FastAuthCallback
 from fastauth.config import FastAuthConfig
 from fastauth.manager import AuthManagerDependency, BaseAuthManager
-from fastauth.models import ID, OAP, PP, RP, UP
+from fastauth.models import ID, OAP, PP, RP, UP, URPP
 from fastauth.strategy.base import TokenStrategy, TokenStrategyDependency
 from fastauth.transport import _get_token_from_request
 from fastauth.types import TokenType
@@ -25,6 +25,22 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         ) = None,
         token_strategy_dependency: TokenStrategyDependency[UP, ID] | None = None,
     ):
+        """Main class which have security tools and dependencies
+
+        You can set dependencies over __init__ args or use decorator:
+
+            security = FastAuth()
+
+            @security.set_auth_callback
+            async def auth_callback(config: FastAuthConfig, **kwargs):
+                return BaseAuthManager(config)
+
+
+        :param config: FastAuthConfig instance
+        :param auth_manager_dependency: Async callable with BaseAuthManager class implementation instance
+        :param token_strategy_dependency: Async callable with TokenStrategy class implementation instance
+        """
+
         self._config = config
         super().__init__()
 
@@ -38,12 +54,22 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
     def config(self):
         return self._config
 
-    def access_token_required(self):
-        """Return async callable which check if token payload has access type"""
+    def access_token_required(
+        self,
+    ) -> Callable[..., Coroutine[Any, Any, dict[str, Any]]]:
+        """Return async callable which check if token payload has access type
+        :raise TokenRequired exception raised if invalid type
+        :return Async callable with decoded access token payload
+        """
         return self._token_required("access")
 
-    def refresh_token_required(self):
-        """Return async callable which check if token payload has refresh type"""
+    def refresh_token_required(
+        self,
+    ) -> Callable[..., Coroutine[Any, Any, dict[str, Any]]]:
+        """Return async callable which check if token payload has refresh type
+        :raise TokenRequired exception raised if invalid type
+        :return Async callable with decoded refresh token payload
+        """
         return self._token_required("refresh")
 
     async def create_access_token(
@@ -53,15 +79,26 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         headers: dict[str, str] | None = None,
         extra: dict[str, str] | None = None,
         **kwargs,
-    ):
+    ) -> str:
+        """
+        Create a new access token from user model and fields defined in TokenStrategy.
+        Used custom DI injector to resolve FastAPI Dependencies.
+        :param uid: User ID in Database
+        :param max_age: Max age, Default: FastAuthConfig.ACCESS_TOKEN_MAX_AGE
+        :param headers: Optional headers for token
+        :param extra: Extra data for token payload, should be dict type
+        :param kwargs: Optional keyword arguments for token encoders
+        :return: Token string
+        """
+
         async def _create_access_token(
             strategy=self.TOKEN_STRATEGY, manager=self.AUTH_MANAGER
-        ):
+        ) -> str:
             return await manager.create_token(
                 uid,
                 token_type="access",
                 strategy=strategy,
-                max_age=max_age or self._config.JWT_ACCESS_TOKEN_MAX_AGE,
+                max_age=max_age or self._config.ACCESS_TOKEN_MAX_AGE,
                 headers=headers,
                 extra_data=extra,
                 **kwargs,
@@ -77,7 +114,18 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         headers: dict[str, str] | None = None,
         extra: dict[str, str] | None = None,
         **kwargs,
-    ):
+    ) -> str:
+        """
+        Create a new refresh token from user model and fields defined in TokenStrategy.
+        Used custom DI injector to resolve FastAPI Dependencies.
+        :param uid: User ID in Database
+        :param max_age: Max age, Default: FastAuthConfig.REFRESH_TOKEN_MAX_AGE
+        :param headers: Optional headers for token
+        :param extra: Extra data for token payload, should be dict type
+        :param kwargs: Optional keyword arguments for token encoders
+        :return: Token string
+        """
+
         async def _create_refresh_token(
             strategy=self.TOKEN_STRATEGY, manager=self.AUTH_MANAGER
         ):
@@ -85,7 +133,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
                 uid,
                 token_type="refresh",
                 strategy=strategy,
-                max_age=max_age or self._config.JWT_REFRESH_TOKEN_MAX_AGE,
+                max_age=max_age or self._config.REFRESH_TOKEN_MAX_AGE,
                 headers=headers,
                 extra_data=extra,
                 **kwargs,
@@ -100,14 +148,24 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         permissions: list[str] | None = None,
         is_active: bool | None = None,
         is_verified: bool | None = None,
-    ):
-        """Return callable with current user
-        if roles or permissions is set, check if user has access to this resource
+    ) -> Callable[..., Coroutine[Any, Any, URPP | UP]]:
+        """
+        Return callable with current user model.
+        If roles or permissions list set, checks if user has at least one role or permissions for
+        provided.
+        If is_active or is_verified flag set, checks if user has in this fields True or provided value
+
+        :param roles: List of role codenames that users has to have for allowing access
+        :param permissions: List of permissions codenames that users has to have
+        :param is_active: Flag to check if user in DB is active
+        :param is_verified: Flag to check if user in DB is verified
+        :return Async callable with current user model
+
         """
         sig = self._user_parser_signature()
 
         @with_signature(sig)
-        async def _user_required(*args, **kwargs):
+        async def _user_required(**kwargs):
             token_payload = kwargs.get("token_payload")
             auth_manager: BaseAuthManager[UP, ID, RP, PP, OAP] = kwargs.get(
                 "auth_manager"
@@ -116,8 +174,9 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
             user: UP = await auth_manager.get_user(
                 token_payload.get("sub"), is_active, is_verified
             )
+
             if roles is not None or permissions is not None:
-                user = await auth_manager.check_access(
+                user: URPP = await auth_manager.check_access(
                     user, roles or [], permissions or []
                 )
             return user
@@ -134,8 +193,19 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         secure: bool | None = None,
         httponly: bool | None = None,
         samesite: Literal["lax", "strict", "none"] | None = None,
-    ):
-        """Set access cookie to response"""
+    ) -> Response:
+        """Set access to cookie to response
+        Cookie name defined in FastAuthConfig.COOKIE_ACCESS_TOKEN_NAME
+        :param token: Token string
+        :param response: FastApi response
+        :param max_age: Max cookie age, Default: FastAuthConfig.COOKIE_ACCESS_TOKEN_MAX_AGE
+        :param path: Cookie path: Default: FastAuthConfig.COOKIE_DEFAULT_PATH
+        :param domain: Cookie domain: Default: FastAuthConfig.COOKIE_DEFAULT_DOMAIN
+        :param secure: Cookie secure flag: Default: FastAuthConfig.COOKIE_DEFAULT_SECURE
+        :param httponly: Cookie httponly flag: Default: FastAuthConfig.COOKIE_DEFAULT_HTTPONLY
+        :param samesite: Cookie samesite: Default: FastAuthConfig.COOKIE_DEFAULT_SAMESITE
+        :return FastAPI Response with `set-cookie` headers
+        """
         return self._set_cookie(
             response,
             token,
@@ -158,8 +228,19 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         secure: bool | None = None,
         httponly: bool | None = None,
         samesite: Literal["lax", "strict", "none"] | None = None,
-    ):
-        """Set refresh cookie to response"""
+    ) -> Response:
+        """Set refresh to cookie to response
+        Cookie name defined in FastAuthConfig.COOKIE_REFRESH_TOKEN_NAME
+        :param token: Token string
+        :param response: FastApi response
+        :param max_age: Max cookie age, Default: FastAuthConfig.COOKIE_REFRESH_TOKEN_MAX_AGE
+        :param path: Cookie path: Default: FastAuthConfig.COOKIE_DEFAULT_PATH
+        :param domain: Cookie domain: Default: FastAuthConfig.COOKIE_DEFAULT_DOMAIN
+        :param secure: Cookie secure flag: Default: FastAuthConfig.COOKIE_DEFAULT_SECURE
+        :param httponly: Cookie httponly flag: Default: FastAuthConfig.COOKIE_DEFAULT_HTTPONLY
+        :param samesite: Cookie samesite: Default: FastAuthConfig.COOKIE_DEFAULT_SAMESITE
+        :return FastAPI Response with `set-cookie` headers"""
+
         return self._set_cookie(
             response,
             token,
@@ -184,6 +265,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         httponly: bool | None = None,
         samesite: Literal["lax", "strict", "none"] | None = None,
     ):
+        """Set cookie to response by key and value"""
         response.set_cookie(
             key=key,
             value=token,
@@ -205,8 +287,16 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         secure: bool | None = None,
         httponly: bool | None = None,
         samesite: Literal["lax", "strict", "none"] | None = None,
-    ):
-        """Remove all cookies set previously"""
+    ) -> Response:
+        """Remove access and refresh cookie from response
+        :param response: FastAPI response
+        :param path: Cookie path: Default: FastAuthConfig.COOKIE_DEFAULT_PATH
+        :param domain: Cookie domain: Default: FastAuthConfig.COOKIE_DEFAULT_DOMAIN
+        :param secure: Cookie secure flag: Default: FastAuthConfig.COOKIE_DEFAULT_SECURE
+        :param httponly: Cookie httponly flag: Default: FastAuthConfig.COOKIE_DEFAULT_HTTPONLY
+        :param samesite: Cookie samesite: Default: FastAuthConfig.COOKIE_DEFAULT_SAMESITE
+        :return FastAPI Response with `set-cookie=''` headers
+        """
         response = self._unset_cookie(
             self._config.COOKIE_ACCESS_TOKEN_NAME,
             response,
@@ -238,6 +328,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         httponly: bool | None = None,
         samesite: Literal["lax", "strict", "none"] | None = None,
     ):
+        """Remove cookies from response"""
         response.delete_cookie(
             key,
             path or self._config.COOKIE_DEFAULT_PATH,
@@ -248,11 +339,18 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         )
         return response
 
-    def _token_required(self, type: TokenType = "access"):
+    def _token_required(
+        self, type: TokenType = "access"
+    ) -> Callable[..., Coroutine[Any, Any, Dict[str, Any]]]:
+        """Inject new signature by makefun to async callable
+        and return it. User for FastAPI Dependency injection system by passing callable to depends function
+        :param type: TokenType for checking required token type
+        """
+
         sig = self._token_parser_signature(refresh=bool(type == "refresh"))
 
         @with_signature(sig)
-        async def _token_type_required(*args, **kwargs):
+        async def _token_type_required(**kwargs):
             strategy: TokenStrategy[UP, ID] = kwargs.get("strategy")
             token: str = kwargs.get("token")
 
@@ -264,6 +362,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         return _token_type_required
 
     def _token_parser_signature(self, refresh: bool = False):
+        """Return signature with TokenStrategy dependency and Token string from Transport schema"""
         parameters: list[Parameter] = [
             Parameter(
                 name="strategy",
@@ -280,6 +379,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
         return Signature(parameters)
 
     def _user_parser_signature(self):
+        """Return signature with auth manager dependency and token payload from access_token_required callable"""
         parameters: list[Parameter] = [
             Parameter(
                 name="auth_manager",
@@ -296,23 +396,31 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
 
     @property
     def AUTH_MANAGER(self) -> BaseAuthManager:
-        """Get auth service dependency"""
+        """Return dependency with injected auth manager callback"""
         return Depends(self._get_auth_callback())
 
     @property
     def TOKEN_STRATEGY(self) -> TokenStrategy:
+        """Return dependency with injected token strategy callback"""
         return Depends(self._get_strategy_callback())
 
     @property
     def ACCESS_TOKEN(self) -> dict[str, Any]:
+        """Return dependency with Access token payload"""
         return Depends(self.access_token_required())
 
     @property
     def REFRESH_TOKEN(self) -> dict[str, Any]:
+        """Return dependency with Refresh token payload"""
         return Depends(self.refresh_token_required())
 
     @property
     def DEFAULT_USER(self) -> dict[str, Any]:
+        """Return user_required dependency with current user which have defaults defined in config,
+        where roles is FastAuthConfig.USER_DEFAULT_ROLE
+        is_active is FastAuthConfig.USER_DEFAULT_IS_ACTIVE
+        is_verified is FastAuthConfig.USER_DEFAULT_IS_VERIFIED
+        """
         return Depends(
             self.user_required(
                 roles=[self._config.USER_DEFAULT_ROLE],
@@ -323,6 +431,10 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
 
     @property
     def ADMIN_REQUIRED(self):
+        """Return user_required dependency with admin user which have defined roles in FastAuthConfig.ADMIN_DEFAULT_ROLE
+        is_active is FastAuthConfig.USER_DEFAULT_IS_ACTIVE
+        is_verified is FastAuthConfig.USER_DEFAULT_IS_VERIFIED
+        """
         return Depends(
             self.user_required(
                 roles=[self._config.ADMIN_DEFAULT_ROLE],
