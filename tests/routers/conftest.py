@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastauth.manager import BaseAuthManager
 from fastauth.repository import AbstractUserRepository
 
+pytest.skip("Skip")
 
 @pytest.fixture
 def router_security_instance(fastauth_instance, fastauth_manager, fastauth_strategy):

@@ -21,6 +21,7 @@ async def test_dependency_call():
 
 @pytest.mark.asyncio
 async def test_injectable_decorator():
+
     @injectable
     async def wrapped(func=Depends(my_function)):
         return func

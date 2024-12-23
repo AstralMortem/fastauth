@@ -59,7 +59,6 @@ oauth = [
 [tool.hatch.build.targets.sdist]
 include = [
   "/README.md",
-  "/tests",
   "/fastauth"
 ]
 
@@ -77,8 +76,9 @@ dev-dependencies = [
     "uvicorn",
     "sqlalchemy",
     "greenlet",
-    "aiosqlite"
+    "aiosqlite",
 ]
+
 [tool.ruff]
 exclude = [
     "tests",
@@ -130,7 +130,6 @@ no_implicit_optional = false
 # ========= TESTS =================
 
 [tool.hatch.envs.hatch-test]
-default-args = ["tests"]
 extra-dependencies = [
     "pytest-asyncio",
     "pytest-cov",
@@ -139,6 +138,6 @@ extra-dependencies = [
 
 [tool.hatch.envs.hatch-test.scripts]
 run = "pytest{env:HATCH_TEST_ARGS:} {args}"
-run-cov = "coverage run -m pytest{env:HATCH_TEST_ARGS:} --cov-report=xml --junitxml=junit.xml"
+run-cov = "coverage run -m pytest{env:HATCH_TEST_ARGS:} {args} --junitxml=junit.xml && coverage xml"
 cov-combine = "coverage combine"
 cov-report = "coverage report"
