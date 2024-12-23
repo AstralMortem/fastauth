@@ -3,8 +3,9 @@ from typing import TYPE_CHECKING, Generic
 
 from fastauth.models import ID
 from sqlalchemy import Boolean, ForeignKey, String
-from sqlalchemy._generic import GUID
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
+
+from ._generic import GUID
 
 
 class SQLAlchemyBaseUser(Generic[ID]):
@@ -95,7 +96,9 @@ class UserRBACMixin:
 
 
 class UserOAuthMixin:
-    oauth_accounts: Mapped[SQLAlchemyBaseOAuthAccount] = relationship()
+    @declared_attr
+    def oauth_accounts(self) -> Mapped["SQLAlchemyBaseOAuthAccount"]:
+        return relationship()
 
 
 __all__ = [

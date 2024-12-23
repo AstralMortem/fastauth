@@ -14,7 +14,7 @@ keywords = [
     "Authorization",
     "OAuth2",
     "RBAC",
-    "JWT",
+    "JWTHelper",
     "Cookie",
     "Session"]
 authors = [
@@ -67,7 +67,27 @@ include = [
 dev-dependencies = [
     "mypy",
     "ruff",
-    "pre-commit"
+    "pre-commit",
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "coverage",
+    "httpx",
+    "httpx-oauth",
+    "uvicorn",
+    "sqlalchemy",
+    "greenlet",
+    "aiosqlite"
+]
+[tool.ruff]
+exclude = [
+    "tests",
+    "examples",
+    "docs",
+    ".venv",
+    ".github",
+    ".git",
+    "dist"
 ]
 
 [tool.ruff.lint]
@@ -104,6 +124,7 @@ exclude_lines = [
 strict = true
 warn_return_any = false
 no_implicit_optional = false
+
 
 
 # ========= TESTS =================

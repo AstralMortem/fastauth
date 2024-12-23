@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from fastauth.fastauth import FastAuth
 from fastauth.schema import UR_S, UU_S
@@ -15,13 +15,19 @@ def get_users_router(
 
     @router.get("/me", response_model=user_read)
     async def get_me(
-        user=security.user_required(is_active=is_active, is_verified=is_verified),
+        user=Depends(
+            security.user_required(is_active=is_active, is_verified=is_verified)
+        ),
     ):
         return user
 
     @router.patch("/me", response_model=user_read)
     async def patch_me(
-        data: user_update, user=security.user_required(), manager=security.AUTH_MANAGER
+        data: user_update,
+        user=Depends(
+            security.user_required(is_active=is_active, is_verified=is_verified)
+        ),
+        manager=security.AUTH_MANAGER,
     ):
         return await manager._update_user(user, data.model_dump(exclude_unset=True))
 

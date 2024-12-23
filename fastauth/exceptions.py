@@ -21,7 +21,7 @@ class InvalidToken(HTTPException):
         super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=msg)
 
 
-class ItemNotFound(HTTPException):
+class ItemNotFound(HTTPException, Exception):
     def __init__(self, msg: str | None = None, headers: dict[str, str] | None = None):
         text = "Item not found"
         if msg:
@@ -31,8 +31,16 @@ class ItemNotFound(HTTPException):
         )
 
 
-UserNotFound = ItemNotFound("User not found")
+class UserNotFound(ItemNotFound):
+    def __init__(self):
+        super().__init__("User not found")
+
+
+# UserNotFound = ItemNotFound("User not found")
 UserAlreadyExists = HTTPException(status_code=403, detail="User already exists")
 AccessDenied = HTTPException(
     status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
 )
+
+RoleNotFound = ItemNotFound("Role not found")
+PermissionNotFound = ItemNotFound("Permission not found")

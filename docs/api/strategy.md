@@ -3,6 +3,6 @@
 ::: fastauth.strategy.base.TokenStrategy
 
 
-## JWT Strategy
+## JWTHelper Strategy
 
 ::: fastauth.strategy.jwt.JWTStrategy

@@ -12,11 +12,14 @@ class FastAuthConfig(BaseSettings):
     TOKEN_LOCATIONS: list[TokenLocations] = ["headers", "cookies"]
     ENABLE_REFRESH_TOKEN: bool = True
 
-    # JWT SECTION
+    # JWTHelper SECTION
 
     JWT_SECRET: str = ""
     JWT_ALGORITHM: str = "HS256"
     JWT_DEFAULT_AUDIENCE: StringOrSequence = ["fastauth:auth"]
+    JWT_DEFAULT_VERIFICATION_AUDIENCE: StringOrSequence = ["fastauth:verification"]
+    JWT_DEFAULT_RESET_AUDIENCE: StringOrSequence = ["fastauth:reset"]
+    JWT_DEFAULT_STATE_AUDIENCE: StringOrSequence = ["fastauth:oauth-state"]
 
     JWT_ACCESS_TOKEN_MAX_AGE: int = Field(
         default_factory=lambda self: self.get("ACCESS_TOKEN_MAX_AGE")
@@ -24,6 +27,10 @@ class FastAuthConfig(BaseSettings):
     JWT_REFRESH_TOKEN_MAX_AGE: int = Field(
         default_factory=lambda self: self.get("REFRESH_TOKEN_MAX_AGE")
     )
+
+    JWT_VERIFY_TOKEN_MAX_AGE: int = 60 * 60
+    JWT_RESET_TOKEN_MAX_AGE: int = 60 * 60
+    JWT_STATE_TOKEN_MAX_AGE: int = 60 * 60
 
     # COOKIE SECTION
 
@@ -49,13 +56,20 @@ class FastAuthConfig(BaseSettings):
     TOKEN_REFRESH_URL: str = "/token/refresh"
 
     ROUTER_USERS_DEFAULT_PREFIX: str = "/users"
+    ROUTER_ROLES_DEFAULT_PREFIX: str = "/roles"
+    ROUTER_PERMISSIONS_DEFAULT_PREFIX: str = "/permissions"
 
     # AUTH SECTION
 
-    USER_LOGIN_FIELDS: str | conlist(str, min_length=1) = ["email"]
+    USER_LOGIN_FIELDS: str | conlist(str, min_length=1) = "email"
     USER_FIELDS_IN_TOKEN: conlist(str, min_length=1) = [
         "email",
         "id",
         "is_active",
         "is_verified",
     ]
+
+    ADMIN_DEFAULT_ROLE: str = "Admin"
+    USER_DEFAULT_ROLE: str = "User"
+    USER_DEFAULT_IS_ACTIVE: bool = True
+    USER_DEFAULT_IS_VERIFIED: bool = False

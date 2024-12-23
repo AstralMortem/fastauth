@@ -1,4 +1,4 @@
-from sqlalchemy.models import (
+from fastauth.contrib.sqlalchemy.models import (
     SQLAlchemyBaseOAuthAccount,
     SQLAlchemyBaseOAuthAccountUUID,
     SQLAlchemyBasePermission,
@@ -10,7 +10,7 @@ from sqlalchemy.models import (
     UserOAuthMixin,
     UserRBACMixin,
 )
-from sqlalchemy.repositories import (
+from fastauth.contrib.sqlalchemy.repositories import (
     SQLAlchemyOAuthRepository,
     SQLAlchemyRBACRepository,
     SQLAlchemyUserRepository,

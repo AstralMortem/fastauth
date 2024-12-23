@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from fastauth.config import FastAuthConfig
-from fastauth.utils.jwt_helper import JWT
+from fastauth.utils.jwt_helper import JWTHelper
 
 
 @pytest.fixture
@@ -20,7 +20,9 @@ def mock_config():
 
 @pytest.fixture
 def jwt_service(mock_config):
-    return JWT(secretkey=mock_config.JWT_SECRET, algorithm=mock_config.JWT_ALGORITHM)
+    return JWTHelper(
+        secretkey=mock_config.JWT_SECRET, algorithm=mock_config.JWT_ALGORITHM
+    )
 
 
 # Test for the decode_token method

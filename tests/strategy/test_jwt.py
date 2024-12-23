@@ -45,7 +45,7 @@ async def test_read_token_invalid(token_strategy):
     with pytest.raises(exceptions.InvalidToken) as exc:
         await token_strategy.read_token(token)
 
-    assert "Invalid JWT token" in str(exc.value)
+    assert "Invalid JWTHelper token" in str(exc.value)
     token_strategy.encoder.decode_token.assert_called_once_with(
         token, audience="test-audience"
     )

@@ -7,7 +7,7 @@ from fastauth.config import FastAuthConfig
 from fastauth.models import ID, UP
 from fastauth.strategy.base import TokenStrategy
 from fastauth.types import TokenType
-from fastauth.utils.jwt_helper import JWT
+from fastauth.utils.jwt_helper import JWTHelper
 
 
 class JWTStrategy(Generic[UP, ID], TokenStrategy[UP, ID]):
@@ -15,7 +15,7 @@ class JWTStrategy(Generic[UP, ID], TokenStrategy[UP, ID]):
 
     def __init__(self, config: FastAuthConfig):
         super().__init__(config)
-        self.encoder = JWT(config.JWT_SECRET, config.JWT_ALGORITHM)
+        self.encoder = JWTHelper(config.JWT_SECRET, config.JWT_ALGORITHM)
 
     async def read_token(self, token: str, **kwargs) -> dict[str, Any]:
         try:
@@ -26,7 +26,7 @@ class JWTStrategy(Generic[UP, ID], TokenStrategy[UP, ID]):
             )
 
         except DecodeError as e:
-            msg = f"Invalid JWT token: {e}"
+            msg = f"Invalid JWTHelper token: {e}"
             raise exceptions.InvalidToken(msg) from e
 
     async def write_token(self, user: UP, token_type: TokenType, **kwargs) -> str:
@@ -36,7 +36,7 @@ class JWTStrategy(Generic[UP, ID], TokenStrategy[UP, ID]):
         }
         for field in self._config.USER_FIELDS_IN_TOKEN:
             if user.__dict__.get(field, False):
-                payload.update({field: user.__dict__[field]})
+                payload.update({field: str(user.__dict__[field])})
 
         max_age = kwargs.pop(
             "max_age",

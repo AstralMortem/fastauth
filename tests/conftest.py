@@ -6,7 +6,7 @@ from fastauth._callback import _FastAuthCallback
 from fastauth.config import FastAuthConfig
 from fastauth.fastauth import FastAuth
 from fastauth.manager import BaseAuthManager
-from fastauth.repository import UserRepositoryProtocol
+from fastauth.repository import AbstractUserRepository
 from fastauth.strategy.base import TokenStrategy
 
 
@@ -35,7 +35,7 @@ def fastauth_user():
 
 @pytest.fixture
 def fastauth_user_repository():
-    return Mock(spec=UserRepositoryProtocol)
+    return Mock(spec=AbstractUserRepository)
 
 
 @pytest.fixture

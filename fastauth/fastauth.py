@@ -20,8 +20,9 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
     def __init__(
         self,
         config: FastAuthConfig,
-        auth_manager_dependency: AuthManagerDependency[UP, ID, RP, PP, OAP]
-        | None = None,
+        auth_manager_dependency: (
+            AuthManagerDependency[UP, ID, RP, PP, OAP] | None
+        ) = None,
         token_strategy_dependency: TokenStrategyDependency[UP, ID] | None = None,
     ):
         self._config = config
@@ -309,3 +310,23 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
     @property
     def REFRESH_TOKEN(self) -> dict[str, Any]:
         return Depends(self.refresh_token_required())
+
+    @property
+    def DEFAULT_USER(self) -> dict[str, Any]:
+        return Depends(
+            self.user_required(
+                roles=[self._config.USER_DEFAULT_ROLE],
+                is_active=self._config.USER_DEFAULT_IS_ACTIVE,
+                is_verified=self._config.USER_DEFAULT_IS_VERIFIED,
+            )
+        )
+
+    @property
+    def ADMIN_REQUIRED(self):
+        return Depends(
+            self.user_required(
+                roles=[self._config.ADMIN_DEFAULT_ROLE],
+                is_active=self._config.USER_DEFAULT_IS_ACTIVE,
+                is_verified=self._config.USER_DEFAULT_IS_VERIFIED,
+            )
+        )

@@ -1,12 +1,22 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Protocol
 
 import jwt
 
 from fastauth.types import StringOrSequence, TokenType
 
 
-class JWT:
+class TokenHelperProtocol(Protocol):
+    def decode_token(self, token: str, *args, **kwargs) -> dict[str, Any]:
+        raise NotImplementedError
+
+    def encode_token(
+        self, payload: dict[str, Any], token_type: TokenType, *args, **kwargs
+    ) -> str:
+        raise NotImplementedError
+
+
+class JWTHelper:
     def __init__(self, secretkey: str, algorithm: str):
         self._secretkey = secretkey
         self._algorithm = algorithm

@@ -3,7 +3,7 @@
 To make lib more customizable, we separate token encoding and decoding to another class. FastAuth support 1 TokenStrategy
 out the box:
 
-* [JWTStrategy](/api/strategy/#jwt-strategy) - JWT token strategy which use PyJWT library to encode and decode tokens
+* [JWTStrategy](/api/strategy/#jwt-strategy) - JWTHelper token strategy which use PyJWT library to encode and decode tokens
 
 If you want to customize and add your own strategy just inherit abstract [TokenStrategy](/api/strategy/#fastauth.strategy.base.TokenStrategy)
 class from `fastauth.strategy.base` package, and override `write_token` and `read_token` methods:
