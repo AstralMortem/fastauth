@@ -1,9 +1,10 @@
 import uuid
 from typing import TYPE_CHECKING, Generic
 
-from fastauth.models import ID
 from sqlalchemy import Boolean, ForeignKey, String
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship
+
+from fastauth.models import ID
 
 from ._generic import GUID
 
