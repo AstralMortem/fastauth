@@ -8,7 +8,7 @@ from fastauth import exceptions
 from fastauth.schema import TokenResponse
 from fastauth.transport import (
     TRANSPORT_GETTER,
-    _get_token_from_request,
+    get_token_from_request,
     get_login_response,
     get_logout_response,
 )
@@ -60,7 +60,7 @@ async def test_get_token_from_request(fastauth_config, mock_request):
     TRANSPORT_GETTER["headers"] = MagicMock(return_value=mock_bearer_transport)
     TRANSPORT_GETTER["cookies"] = MagicMock(return_value=mock_cookie_transport)
 
-    token_getter = _get_token_from_request(fastauth_config, mock_request)
+    token_getter = get_token_from_request(fastauth_config, mock_request)
 
     # Test valid token from headers
     mock_bearer_transport.schema.return_value = "header-token"

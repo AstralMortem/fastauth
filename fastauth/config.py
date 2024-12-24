@@ -71,5 +71,5 @@ class FastAuthConfig(BaseSettings):
 
     ADMIN_DEFAULT_ROLE: str = "Admin"
     USER_DEFAULT_ROLE: str = "User"
-    USER_DEFAULT_IS_ACTIVE: bool = True
-    USER_DEFAULT_IS_VERIFIED: bool = False
+    USER_DEFAULT_IS_ACTIVE: bool | None = None
+    USER_DEFAULT_IS_VERIFIED: bool | None = None

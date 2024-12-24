@@ -1,3 +1,3 @@
-# FastAuth config
+# FastAuthConfig
 
-::: fastauth.config.FastAuthConfig
+:::fastauth.config.FastAuthConfig

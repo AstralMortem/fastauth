@@ -4,3 +4,5 @@
 
 
 ::: fastauth._callback._FastAuthCallback
+    options:
+        filters: []

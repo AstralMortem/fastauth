@@ -88,6 +88,7 @@ plugins:
             heading_level: 3
             merge_init_into_class: true
             docstring_section_style: spacy
+            show_signature: true
             signature_crossrefs: true
             allow_inspection: true
             show_symbol_type_heading: true
@@ -95,30 +96,43 @@ plugins:
             annotations_path: brief
             docstring_style: sphinx
 
-
 nav:
-  - FastAuth: index.md
-  - Get Started:
-      - Installation: begin/installation.md
-      - Configuration:
-          - begin/configuration/index.md
-          - Models: begin/configuration/models.md
-          - Repositories: begin/configuration/repositories.md
-          - Auth manager: begin/configuration/manager.md
-          - Config: begin/configuration/config.md
-          - Strategy: begin/configuration/strategy.md
-          - FastAuth: begin/configuration/fastauth.md
+  - FastAuth:
+      - index.md
+      - Installation: installation.md
+      - Features: features.md
+      - Routers: routers.md
+      - OAuth2: oauth.md
+  - Configuration:
+      - Models: configuration/models.md
+      - Schema: configuration/schema.md
+      - Repositories: configuration/repositories.md
+      - TokenStrategy: configuration/token_strategy.md
+      - AuthManager: configuration/auth_manager.md
+      - FastAuth: configuration/fastauth.md
+      - Advanced:
+        - Transport: configuration/transport.md
+
   - Contrib:
       - SQLAlchemy:
-          - contrib/sqlalchemy/index.md
           - Models: contrib/sqlalchemy/models.md
           - Repositories: contrib/sqlalchemy/repositories.md
-  - API:
+
+  - API Reference:
       - api/index.md
+      - Contrib:
+          - SQLAlchemy:
+              - Models: api/contrib/sqlalchemy/models.md
+              - Repositories: api/contrib/sqlalchemy/repositories.md
       - Models: api/models.md
       - Repositories: api/repositories.md
-      - BaseAuthManager: api/manager.md
-      - FastAuthConfig: api/config.md
-      - Strategy: api/strategy.md
-      - Transport: api/transport.md
+      - Config: api/config.md
+      - Manager: api/manager.md
       - FastAuth: api/fastauth.md
+      - Strategy: api/strategy.md
+      - Schema: api/schema.md
+      - Transport:
+          - api/transport/index.md
+          - Classes: api/transport/transport.md
+      - Types: api/types.md
+      - Utils: api/utils.md

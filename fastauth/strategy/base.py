@@ -15,9 +15,8 @@ class TokenStrategy(Generic[UP, ID], ABC):
         """
         Decode token and try fetch User model
         :param token: Token string
-        :param auth_manager: Auth Manager instance
         :param kwargs: Extra data
-        :return: User model
+        :return: Token payload dict
         """
         raise NotImplementedError
 

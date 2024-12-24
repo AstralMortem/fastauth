@@ -1,1 +1,3 @@
-# API Documentation
+# FastAuth API Reference
+
+## Project Structure:

@@ -1,14 +1,14 @@
 from abc import abstractmethod
 from typing import Any, Generic, Union
 
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from jwt import PyJWTError
 
 from fastauth import exceptions
 from fastauth.config import FastAuthConfig
 from fastauth.models import ID, OAP, PP, RP, UOAP, UP, URPP
-from fastauth.repository import (
+from fastauth.repositories import (
     AbstractOAuthRepository,
     AbstractRolePermissionRepository,
     AbstractUserRepository,
@@ -21,7 +21,102 @@ from fastauth.utils.jwt_helper import JWTHelper, TokenHelperProtocol
 from fastauth.utils.password import PasswordHelper, PasswordHelperProtocol
 
 
-class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
+class AuthManagerEvents(Generic[UP]):
+    async def on_after_register(self, user: UP, request: Request | None = None) -> None:
+        """
+        Event called after user registration
+        :param user: User model
+        :param request: Optional fastapi request
+        """
+        return  # pragma: no cover
+
+    async def on_after_user_update(
+        self, user: UP, update_dict: dict[str, Any], request: Request | None = None
+    ) -> None:
+        """
+        Event called after user update
+        :param user: User model
+        :param update_dict: Updated fields
+        :param request: Optional fastapi request
+        """
+        return  # pragma: no cover
+
+    async def on_after_request_verify(
+        self, user: UP, token: str, request: Request | None = None
+    ) -> None:
+        """
+        Event called after request verification token
+        :param user: User model
+        :param token: Verification token
+        :param request: Optional fastapi request
+        """
+        return  # pragma: no cover
+
+    async def on_after_verify(self, user: UP, request: Request | None = None) -> None:
+        """
+        Event called after user verification
+        :param user: User model
+        :param request: Optional fastapi request
+        """
+        return  # pragma: no cover
+
+    async def on_after_forgot_password(
+        self, user: UP, token: str, request: Request | None = None
+    ) -> None:
+        """
+        Event called after request forgot password token
+        :param user: User model
+        :param token: Reset token
+        :param request: Optional fastapi request
+        """
+        return  # pragma: no cover
+
+    async def on_after_reset_password(
+        self, user: UP, request: Request | None = None
+    ) -> None:
+        """
+        Event called after user reset password
+        :param user: User model
+        :param request: Optional fastapi request
+        """
+        return  # pragma: no cover
+
+    async def on_after_login(
+        self,
+        user: UP,
+        request: Request | None = None,
+        response: Response | None = None,
+    ) -> None:
+        """
+        Event called after user login
+        :param user: User model
+        :param request: Optional fastapi request
+        :param response: Optional fastapi response
+        """
+        return  # pragma: no cover
+
+    async def on_before_user_delete(
+        self, user: UP, request: Request | None = None
+    ) -> None:
+        """
+        Event called before user deletion
+        :param user: User model
+        :param request: Optional fastapi request
+        """
+        return  # pragma: no cover
+
+    async def on_after_user_delete(
+        self, user: UP, request: Request | None = None
+    ) -> None:
+        """
+        Event called after user deletion
+        :param user: User model
+        :param request: Optional fastapi request
+        """
+        return
+
+
+class BaseAuthManager(Generic[UP, ID, RP, PP, OAP], AuthManagerEvents[UP]):
     @abstractmethod
     def parse_id(self, pk: str):
         """Override this method to convert pk to ID type"""
@@ -293,6 +388,10 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         is_verified: bool | None = None,
     ):
         """Check if user is active or verified"""
+
+        is_active = is_active or self._config.USER_DEFAULT_IS_ACTIVE
+        is_verified = is_verified or self._config.USER_DEFAULT_IS_VERIFIED
+
         if is_active is not None:
             if not user.is_active and is_active:
                 raise exceptions.UserNotFound

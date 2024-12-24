@@ -11,7 +11,7 @@ from fastauth.config import FastAuthConfig
 from fastauth.manager import AuthManagerDependency, BaseAuthManager
 from fastauth.models import ID, OAP, PP, RP, UP, URPP
 from fastauth.strategy.base import TokenStrategy, TokenStrategyDependency
-from fastauth.transport import _get_token_from_request
+from fastauth.transport import get_token_from_request
 from fastauth.types import TokenType
 from fastauth.utils.injector import injectable
 
@@ -176,9 +176,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
             )
 
             if roles is not None or permissions is not None:
-                user: URPP = await auth_manager.check_access(
-                    user, roles or [], permissions or []
-                )
+                user: URPP = await auth_manager.check_access(user, roles, permissions)
             return user
 
         return _user_required
@@ -372,7 +370,7 @@ class FastAuth(Generic[UP, ID, RP, PP, OAP], _FastAuthCallback):
             Parameter(
                 name="token",
                 kind=Parameter.POSITIONAL_OR_KEYWORD,
-                default=Depends(_get_token_from_request(self._config, refresh=refresh)),
+                default=Depends(get_token_from_request(self._config, refresh=refresh)),
                 annotation=SecurityBase,
             ),
         ]

@@ -18,10 +18,17 @@ class JWTStrategy(Generic[UP, ID], TokenStrategy[UP, ID]):
         self.encoder = JWTHelper(config.JWT_SECRET, config.JWT_ALGORITHM)
 
     async def read_token(self, token: str, **kwargs) -> dict[str, Any]:
+        """
+        Read jwt token and return the payload
+        :param token: jwt token string
+        :param kwargs: Extra PyJWT decoder data(audience, leeway, issuer, etc.)
+        :return: Token payload dict
+        :raise InvalidToken: If the token is invalid
+        """
         try:
             return self.encoder.decode_token(
                 token,
-                audience=kwargs.pop("aud", self._config.JWT_DEFAULT_AUDIENCE),
+                audience=kwargs.pop("audience", self._config.JWT_DEFAULT_AUDIENCE),
                 **kwargs,
             )
 
@@ -30,6 +37,14 @@ class JWTStrategy(Generic[UP, ID], TokenStrategy[UP, ID]):
             raise exceptions.InvalidToken(msg) from e
 
     async def write_token(self, user: UP, token_type: TokenType, **kwargs) -> str:
+        """
+        Write jwt token for the user model
+        :param user: User model
+        :param token_type: Token type (access or refresh)
+        :param kwargs: extra token data(audience, max_age, headers, extra_data)
+        :return: Token string
+        """
+
         payload = {
             "sub": str(user.id),
             "type": token_type,

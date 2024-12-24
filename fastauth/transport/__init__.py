@@ -1,5 +1,5 @@
 from inspect import Parameter, Signature
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Coroutine
 
 from fastapi import Depends, Request, Response
 from makefun import with_signature
@@ -20,12 +20,24 @@ TRANSPORT_GETTER = {
 }
 
 
-def _get_token_from_request(
+def get_token_from_request(
     config: FastAuthConfig,
     request: Request | None = None,
     refresh: bool = False,
     locations: list[str] | None = None,
-):
+) -> Callable[..., Coroutine[Any, Any, str]]:
+    """
+    Get token from request using the token transport locations specified in the FastAuthConfig.TOKEN_LOCATIONS.
+    If the token is not found in any of the locations, raise a MissingToken exception.
+    Because used FastAPI SecuredBase, in Transport.scheme() method,  we need to return callable to resolve the dependency later.
+
+    :param config: FastAuthConfig
+    :param request: FastAPI Request
+    :param refresh: flag to set refresh token type
+    :param locations: pass locations to get token from or default will be used
+    :return: Callable with coroutine to pass to FastAPI Depends
+    """
+
     if locations is None:
         locations = config.TOKEN_LOCATIONS
 
@@ -41,7 +53,7 @@ def _get_token_from_request(
         )
 
     @with_signature(Signature(parameters))
-    async def _token_locations(*args, **kwargs):
+    async def _token_locations(**kwargs) -> str:
         errors: list[exceptions.MissingToken] = []
         for location_name, token in kwargs.items():
             if token is not None:
@@ -62,6 +74,13 @@ def _get_token_from_request(
 async def get_login_response(
     security: "FastAuth", tokens: TokenResponse, response: Response | None = None
 ):
+    """
+    Get login response from the token locations specified in the FastAuthConfig.TOKEN_LOCATIONS.
+    :param security: FastAuth instance
+    :param tokens: TokenResponse instance with access and/or refresh tokens
+    :param response: Optional FastAPI Response to modify to
+    :return: FastAPI Response with multiple token locations(eg. headers, cookies) set
+    """
     for location in security.config.TOKEN_LOCATIONS:
         transport_callable = TRANSPORT_GETTER[location]
         transport: TokenTransport = transport_callable(security.config)
@@ -74,6 +93,12 @@ async def get_login_response(
 
 
 async def get_logout_response(security: "FastAuth", response: Response | None = None):
+    """
+    Get logout response from the token locations specified in the FastAuthConfig.TOKEN_LOCATIONS.
+    :param security: FastAuth instance
+    :param response: Optional FastAPI Response to modify to
+    :return: FastAPI Response with unset action for multiple token locations
+    """
     for location in security.config.TOKEN_LOCATIONS:
         transport_callable = TRANSPORT_GETTER[location]
         transport: TokenTransport = transport_callable(security.config)

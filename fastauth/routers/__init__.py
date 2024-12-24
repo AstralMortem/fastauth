@@ -88,12 +88,12 @@ class FastAuthRouter:
     ):
         return get_oauth_router(self.security, client, redirect_url, default_role)
 
-    def register_routers(
+    def register_in_fastapi(
         self, app: FastAPI, schema_map: dict[str, dict[str, type[BaseSchema]]]
     ):
         user_schema = schema_map.get("user")
-        role_schema = schema_map.get("role")
-        permission_schema = schema_map.get("permission")
+        role_schema = schema_map.get("role", None)
+        permission_schema = schema_map.get("permission", None)
 
         routers = [
             (self.get_auth_router(), {"tags": ["Auth"]}),
@@ -115,26 +115,34 @@ class FastAuthRouter:
             (self.get_reset_router(), {"tags": ["Auth"]}),
             (self.get_verify_router(user_schema.get("read")), {"tags": ["Auth"]}),
             (
-                self.get_roles_router(
-                    role_schema.get("read"),
-                    role_schema.get("create"),
-                    role_schema.get("update"),
-                    role_schema.get("default_admin_role", None),
-                    user_schema.get("is_active", None),
-                    user_schema.get("is_verified"),
-                ),
-                {"tags": ["Roles"]},
+                (
+                    self.get_roles_router(
+                        role_schema.get("read"),
+                        role_schema.get("create"),
+                        role_schema.get("update"),
+                        role_schema.get("default_admin_role", None),
+                        user_schema.get("is_active", None),
+                        user_schema.get("is_verified"),
+                    ),
+                    {"tags": ["Roles"]},
+                )
+                if role_schema
+                else None
             ),
             (
-                self.get_permissions_router(
-                    permission_schema.get("read"),
-                    permission_schema.get("create"),
-                    permission_schema.get("read"),
-                    role_schema.get("default_admin_role", None),
-                    user_schema.get("is_active", None),
-                    user_schema.get("is_verified"),
-                ),
-                {"tags": ["Permission"]},
+                (
+                    self.get_permissions_router(
+                        permission_schema.get("read"),
+                        permission_schema.get("create"),
+                        permission_schema.get("read"),
+                        role_schema.get("default_admin_role", None),
+                        user_schema.get("is_active", None),
+                        user_schema.get("is_verified"),
+                    ),
+                    {"tags": ["Permission"]},
+                )
+                if permission_schema
+                else None
             ),
         ]
 

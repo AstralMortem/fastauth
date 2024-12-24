@@ -23,7 +23,7 @@ async def init_db(app: FastAPI):
 app = FastAPI(lifespan=init_db)
 auth_router = FastAuthRouter(security)
 
-auth_router.register_routers(app, ROUTER_SCHEMA)
+auth_router.register_in_fastapi(app, ROUTER_SCHEMA)
 
 
 @app.get("/secured-rbac", response_model=UserRead)

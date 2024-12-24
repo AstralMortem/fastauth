@@ -17,6 +17,13 @@ class TokenTransport(ABC):
 
     @abstractmethod
     def schema(self, request: Request, refresh: bool = False) -> type[SecurityBase]:
+        """
+        Return the security schema for the token transport
+        :param request: FastAPI request
+        :param refresh: Flag if the token is a refresh type
+        :return: SecurityBase instance
+        """
+
         raise NotImplementedError
 
     @abstractmethod
@@ -26,10 +33,23 @@ class TokenTransport(ABC):
         content: TokenResponse,
         response: Response | None = None,
     ) -> Response:
+        """
+        Generate the login response
+        :param security: FastAuth instance
+        :param content: TokenResponse instance
+        :param response: FastAPI Response instance
+        :return: FastAPI Response instance
+        """
         raise NotImplementedError
 
     @abstractmethod
     async def logout_response(
         self, security: "FastAuth", response: Response | None = None
     ) -> Response:
+        """
+        Generate the logout response
+        :param security: FastAuth instance
+        :param response: FastAPI Response instance
+        :return: FastAPI Response instance
+        """
         raise NotImplementedError

@@ -1,8 +1,7 @@
-# BaseTokenStrategy
+# TokenStrategy
 
-::: fastauth.strategy.base.TokenStrategy
+:::fastauth.strategy.base.TokenStrategy
 
+## JWT Token Strategy
 
-## JWTHelper Strategy
-
-::: fastauth.strategy.jwt.JWTStrategy
+:::fastauth.strategy.jwt.JWTStrategy

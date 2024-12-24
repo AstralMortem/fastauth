@@ -1,39 +1,43 @@
 # SQLAlchemy repositories
 
-After creation models, we need to create `Repositories` for all models
-## User Repository
+Repositories are used to interact with the database and perform CRUD operations.
+All SQLAlchemy repositories are located in the `fastauth.contrib.sqlalchemy.repositories` module.
+All repository have a `AsyncSession` in __init__ method, to run db operations.
+
+## User repository
+
+The user repository is used to interact with the `User` model in the database.
+To create user repository inherit `SQLAlchemyUserRepository` class and set the `user_model` attribute.
+Also set User and ID type in Generic to get type hinting.
 
 ```python
-from fastauth.contrib.sqlalchemy import SQLAlchemyUserRepository
-import uuid
-import User # from previous examples
-
-class UserRepository(SQLAlchemyUserRepository[User, uuid.UUID]):
-    user_model = User
-
+--8<-- "docs/snippets/sqlalchemy/repositories.py::7"
 ```
 
-And it's all, if you need you can override default sqlalchemy orm queries, or add your own, and then override
-`BaseAuthManager` to call it in routes.
+## RBAC repository
 
-## RBAC Repository
+The RBAC repository is used to interact with the `Role` and `Permission` models.
 
 ```python
-from fastauth.contrib.sqlalchemy import SQLAlchemyRBACRepository
-import Role, Permission # from previous examples
+--8<-- "docs/snippets/sqlalchemy/repositories.py::3"
 
-class RBACRepository(SQLAlchemyRBACRepository[Role, Permission])
-    role_model = Role
-    permission_model = Permission
+
+--8<-- "docs/snippets/sqlalchemy/repositories.py:10:12"
 ```
 
-## OAuth Repository
+## OAuth repository
+
+The OAuth repository is used to interact with the `OAuth` and `User` models.
+
 ```python
-from fastauth.contrib.sqlalchemy import SQLAlchemyOAuthRepository
-import uuid
-import OAuthAccount # from previous examples
+--8<-- "docs/snippets/sqlalchemy/repositories.py::3"
 
-class RBACRepository(SQLAlchemyOAuthRepository[OAuthAccount, uuid.UUID]):
-    oauth_model = OAuthAccount
 
+--8<-- "docs/snippets/sqlalchemy/repositories.py:15:17"
+```
+
+## Full example
+
+```python
+--8<-- "docs/snippets/sqlalchemy/repositories.py"
 ```

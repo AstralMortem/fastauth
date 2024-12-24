@@ -29,16 +29,11 @@ def injectable(
     This allows dependencies defined with FastAPI's Depends mechanism to be automatically
     resolved and injected into CLI tools or other components, not just web endpoints.
 
-    Args:
-        func: The function to be wrapped, enabling dependency injection.
-        use_cache: Whether to use the dependency cache for the arguments a.k.a sub-dependencies.
-
-    Returns:
-        The wrapped function with dependencies injected.
-
-    Raises:
-        ValueError: If the dependant.call is not a callable function.
-        DependencyError: If an error occurs during dependency resolution.
+    :param func: The function to be wrapped, enabling dependency injection.
+    :param use_cache: Whether to use the dependency cache for the arguments a.k.a sub-dependencies.
+    :raise ValueError: If the dependant.call is not a callable function.
+    :raise DependencyError: If an error occurs during dependency resolution.
+    :returns The wrapped function with dependencies injected.
     """
 
     def _impl(

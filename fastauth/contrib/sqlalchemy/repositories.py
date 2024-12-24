@@ -1,13 +1,14 @@
 from typing import Any, Generic
 
+from sqlalchemy import or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from fastauth.models import ID, OAP, PP, RP, UOAP, UP
-from fastauth.repository import (
+from fastauth.repositories import (
     AbstractOAuthRepository,
     AbstractRolePermissionRepository,
     AbstractUserRepository,
 )
-from sqlalchemy import or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class SQLAlchemyUserRepository(AbstractUserRepository[UP, ID], Generic[UP, ID]):
