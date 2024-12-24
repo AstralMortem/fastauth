@@ -6,7 +6,7 @@ from fastauth._callback import _FastAuthCallback
 from fastauth.config import FastAuthConfig
 from fastauth.fastauth import FastAuth
 from fastauth.manager import BaseAuthManager
-from fastauth.repository import AbstractUserRepository
+from fastauth.repositories import AbstractUserRepository
 from fastauth.strategy.base import TokenStrategy
 
 

@@ -129,11 +129,8 @@ no_implicit_optional = false
 docs = [
     "mkdocs-material>=9.5.49",
     "mkdocs>=1.6.1",
-]
-dev = [
     "mkdocstrings-python>=1.12.2",
 ]
-
 
 
 # ========= TESTS =================

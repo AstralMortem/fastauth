@@ -400,7 +400,6 @@ dev = [
     { name = "greenlet" },
     { name = "httpx" },
     { name = "httpx-oauth" },
-    { name = "mkdocstrings-python" },
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -413,6 +412,7 @@ dev = [
 docs = [
     { name = "mkdocs" },
     { name = "mkdocs-material" },
+    { name = "mkdocstrings-python" },
 ]
 
 [package.metadata]
@@ -434,7 +434,6 @@ dev = [
     { name = "greenlet" },
     { name = "httpx" },
     { name = "httpx-oauth" },
-    { name = "mkdocstrings-python", specifier = ">=1.12.2" },
     { name = "mypy" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -447,6 +446,7 @@ dev = [
 docs = [
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-material", specifier = ">=9.5.49" },
+    { name = "mkdocstrings-python", specifier = ">=1.12.2" },
 ]
 
 [[package]]

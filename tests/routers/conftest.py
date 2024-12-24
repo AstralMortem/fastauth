@@ -4,7 +4,7 @@ import pytest
 from fastapi import FastAPI
 
 from fastauth.manager import BaseAuthManager
-from fastauth.repository import AbstractUserRepository
+from fastauth.repositories import AbstractUserRepository
 
 pytest.skip("Skip")
 
