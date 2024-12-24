@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
 from fastauth.fastauth import FastAuth
 from fastauth.schema import PC_S, PR_S, PU_S, RC_S, RR_S, RU_S
@@ -38,16 +38,20 @@ def get_roles_router(
         return await manager.get_role_by_codename(codename)
 
     @router.post("/", dependencies=[admin_dep], response_model=role_read)
-    async def create_role(data: role_create, manager=security.AUTH_MANAGER):
-        return await manager.create_role(data)
+    async def create_role(
+        request: Request, data: role_create, manager=security.AUTH_MANAGER
+    ):
+        return await manager.create_role(data, request)
 
     @router.patch("/{id}", dependencies=[admin_dep], response_model=role_read)
-    async def update_role(id: int, data: role_update, manager=security.AUTH_MANAGER):
-        return await manager.update_role(id, data)
+    async def update_role(
+        request: Request, id: int, data: role_update, manager=security.AUTH_MANAGER
+    ):
+        return await manager.update_role(id, data, request)
 
     @router.delete("/{id}", dependencies=[admin_dep], response_model=role_read)
-    async def delete_role(id: int, manager=security.AUTH_MANAGER):
-        return await manager.delete_role(id)
+    async def delete_role(request: Request, id: int, manager=security.AUTH_MANAGER):
+        return await manager.delete_role(id, request)
 
     @router.get("/", dependencies=[admin_dep], response_model=list[role_read])
     async def list_role(manager=security.AUTH_MANAGER):
@@ -82,18 +86,25 @@ def get_permissions_router(
         return await manager.get_permission_by_codename(codename)
 
     @router.post("/", dependencies=[admin_dep], response_model=permission_read)
-    async def create_permission(data: permission_create, manager=security.AUTH_MANAGER):
-        return await manager.create_permission(data)
+    async def create_permission(
+        request: Request, data: permission_create, manager=security.AUTH_MANAGER
+    ):
+        return await manager.create_permission(data, request)
 
     @router.patch("/{id}", dependencies=[admin_dep], response_model=permission_read)
     async def update_permission(
-        id: int, data: permission_update, manager=security.AUTH_MANAGER
+        request: Request,
+        id: int,
+        data: permission_update,
+        manager=security.AUTH_MANAGER,
     ):
-        return await manager.update_permission(id, data)
+        return await manager.update_permission(id, data, request)
 
     @router.delete("/{id}", dependencies=[admin_dep], response_model=permission_read)
-    async def delete_permission(id: int, manager=security.AUTH_MANAGER):
-        return await manager.delete_permission(id)
+    async def delete_permission(
+        request: Request, id: int, manager=security.AUTH_MANAGER
+    ):
+        return await manager.delete_permission(id, request)
 
     @router.get("/", dependencies=[admin_dep], response_model=list[permission_read])
     async def list_permission(manager=security.AUTH_MANAGER):

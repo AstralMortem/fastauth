@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from fastauth.fastauth import FastAuth
@@ -14,21 +14,25 @@ def get_auth_router(security: FastAuth):
 
     @router.post(config.TOKEN_LOGIN_URL)
     async def login(
+        request: Request,
         credentials: Annotated[OAuth2PasswordRequestForm, Depends()],
         auth_service=security.AUTH_MANAGER,
         strategy=security.TOKEN_STRATEGY,
     ):
-        tokens: TokenResponse = await auth_service.password_login(credentials, strategy)
+        tokens: TokenResponse = await auth_service.password_login(
+            credentials, strategy, request
+        )
         return await get_login_response(security, tokens)
 
     @router.post(config.TOKEN_LOGOUT_URL, dependencies=[security.ACCESS_TOKEN])
-    async def logout():
+    async def logout(request: Request):
         return await get_logout_response(security)
 
     if config.ENABLE_REFRESH_TOKEN:
 
         @router.post(config.TOKEN_REFRESH_URL)
         async def refresh(
+            request: Request,
             token=security.REFRESH_TOKEN,
             auth_service=security.AUTH_MANAGER,
             strategy=security.TOKEN_STRATEGY,

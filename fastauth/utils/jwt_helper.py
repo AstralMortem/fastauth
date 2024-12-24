@@ -11,7 +11,7 @@ class TokenHelperProtocol(Protocol):
         raise NotImplementedError
 
     def encode_token(
-        self, payload: dict[str, Any], token_type: TokenType, *args, **kwargs
+        self, payload: dict[str, Any], token_type: TokenType | str, *args, **kwargs
     ) -> str:
         raise NotImplementedError
 
@@ -35,7 +35,7 @@ class JWTHelper:
     def encode_token(
         self,
         payload: dict[str, Any],
-        token_type: TokenType,
+        token_type: TokenType | str,
         max_age: int | None = None,
         audience: StringOrSequence | None = None,
         headers: dict[str, Any] | None = None,
