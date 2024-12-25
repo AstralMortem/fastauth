@@ -63,7 +63,7 @@ def test_logout(client, mock_security):
     response = client.post(
         "/auth/logout", headers={"Authorization": "Bearer test_access_token"}
     )
-    # print(response.json())
+    print(response.json())
     # assert response.status_code == status.HTTP_200_OK
 
 
