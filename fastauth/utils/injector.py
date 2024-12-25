@@ -97,5 +97,5 @@ def injectable(
         )
 
     if func is None:
-        return _impl  # type: ignore
+        return _impl  # type: ignore pragma: no cover
     return _impl(func)

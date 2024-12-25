@@ -64,7 +64,3 @@ async def test_write_token(token_type: TokenType, token_strategy):
     token = await token_strategy.write_token(User, token_type=token_type)
 
     assert token == f"encoded-{token_type}-token"
-
-    # assert token_strategy.encoder.encode_token.assert_called_once_with(
-    #     payload, token_type, max_age=3600, audience="test-audience", headers=None
-    # )

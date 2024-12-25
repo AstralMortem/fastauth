@@ -148,3 +148,5 @@ class FastAuthRouter:
 
         for router, kwargs in routers:
             app.include_router(router, **kwargs)
+
+        return app

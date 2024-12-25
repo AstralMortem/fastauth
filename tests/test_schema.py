@@ -1,9 +1,16 @@
 from fastauth.schema.base import BaseSchema
+from fastauth.schema import RBACMixin
 
 
-class UserRead(BaseSchema):
-    id: int
+def test_rbac_mixin():
 
+    base_class = (BaseSchema, RBACMixin)
 
-def test_user():
-    print(UserRead.model_fields)
+    mixin1 = type("UserRead", base_class, {})
+    mixin2 = type("UserCreate", base_class, {})
+
+    assert sorted(list(mixin1.model_fields.keys())) == sorted(
+        ["role_id", "role", "permissions"]
+    )
+
+    print(mixin2.model_fields)

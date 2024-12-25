@@ -63,8 +63,7 @@ class JWTStrategy(Generic[UP, ID], TokenStrategy[UP, ID]):
         )
         audience = kwargs.pop("audience", self._config.JWT_DEFAULT_AUDIENCE)
         headers = kwargs.pop("headers", None)
-        if extra := kwargs.get("extra_data", {}):
-            payload.update(extra)
+        payload.update(kwargs.get("extra_data", {}))
 
         return self.encoder.encode_token(
             payload,

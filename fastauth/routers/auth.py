@@ -24,7 +24,10 @@ def get_auth_router(security: FastAuth):
         )
         return await get_login_response(security, tokens)
 
-    @router.post(config.TOKEN_LOGOUT_URL, dependencies=[security.ACCESS_TOKEN])
+    @router.post(
+        config.TOKEN_LOGOUT_URL,
+        dependencies=[Depends(security.access_token_required())],
+    )
     async def logout(request: Request):
         return await get_logout_response(security)
 

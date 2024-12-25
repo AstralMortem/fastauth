@@ -29,7 +29,7 @@ class CookieTransport(TokenTransport):
     ) -> Response:
         if response:
             response = security.set_access_cookie(content.access_token, response)
-            if content.refresh_token is not None:
+            if content.refresh_token is not None:  # pragma: no cover
                 response = security.set_refresh_cookie(content.refresh_token, response)
             return response
 

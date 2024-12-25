@@ -118,6 +118,7 @@ exclude_lines = [
     'if TYPE_CHECKING:',
     '@overload',
     'if CASUAL_UT',
+    "@declared_attr"
 ]
 
 [tool.mypy]
@@ -139,7 +140,9 @@ docs = [
 extra-dependencies = [
     "pytest-asyncio",
     "pytest-cov",
-    "httpx"
+    "httpx",
+    "httpx_oauth",
+    "sqlalchemy"
 ]
 
 [tool.hatch.envs.hatch-test.scripts]
@@ -147,3 +150,7 @@ run = "pytest{env:HATCH_TEST_ARGS:} {args}"
 run-cov = "coverage run -m pytest{env:HATCH_TEST_ARGS:} {args} --junitxml=junit.xml"
 cov-combine = "coverage combine"
 cov-report = "coverage report && coverage xml"
+
+[tool.pytests.ini_options]
+asyncio_mode="auto"
+asyncio_default_fixture_loop_scope = "session"

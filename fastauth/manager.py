@@ -53,7 +53,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         strategy: TokenStrategy[UP, ID],
         *,
         max_age: int | None = None,
-        headers: str | None = None,
+        headers: dict[str, Any] | None = None,
         extra_data: dict[str, Any] | None = None,
         **kwargs,
     ) -> str:
@@ -97,7 +97,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         if not is_valid:
             raise exceptions.UserNotFound
         if new_hash:
-            user = self.user_repo.update(user, {"hashed_password": new_hash})
+            user = await self.user_repo.update(user, {"hashed_password": new_hash})
 
         access_token = await strategy.write_token(user, "access")
         refresh_token = (
@@ -118,13 +118,17 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         permissions: list[str] | None = None,
     ):
         """Check if user has at least one role or permission to access resource"""
+        if self.rp_repo is None:
+            msg = "RolePermission repository not set"
+            raise NotImplementedError(msg)
+
         if permissions is None:
             permissions = []
         if roles is None:
             roles = []
-        if self.rp_repo is None:
-            msg = "RolePermission repository not set"
-            raise NotImplementedError(msg)
+
+        if len(permissions) == 0 and len(roles) == 0:
+            return user
 
         required_roles_set = set(roles)
         required_permissions_set = set(permissions)
@@ -162,6 +166,8 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
             for field_name in self._config.USER_LOGIN_FIELDS:
                 if value := data.model_fields.get(field_name, None):
                     user = await self.user_repo.get_by_field(value, field_name)
+                    if user is not None:
+                        raise exceptions.UserAlreadyExists
 
         if user is not None:
             raise exceptions.UserAlreadyExists
@@ -188,6 +194,8 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
 
     async def request_verify(self, email: str, request: Request | None = None):
         user = await self.user_repo.get_by_email(email)
+        if user is None:
+            raise exceptions.UserNotFound
         if not user.is_active:
             raise exceptions.UserNotFound
         if user.is_verified:
@@ -226,8 +234,8 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
             raise exceptions.InvalidToken("verification")
 
         parsed_id = self.parse_id(user_id)
-        if parsed_id != user_id:
-            exceptions.InvalidToken("verification")
+        if parsed_id != user.id:
+            raise exceptions.InvalidToken("verification")
 
         if user.is_verified:
             raise HTTPException(403, "User already verified")
@@ -330,7 +338,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
     ):
         instance = await self.get_user(user_id)
         valid_data = data.model_dump(exclude_unset=True, exclude_defaults=True)
-        return self._update_user(instance, valid_data, request)
+        return await self._update_user(instance, valid_data, request)
 
     async def _update_user(
         self, user: UP, data: dict[str, Any], request: Request | None = None
@@ -392,6 +400,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         valid_data = data.model_dump(exclude_unset=True, exclude_defaults=True)
         role = await self.rp_repo.update_role(role, valid_data)
         await self.on_after_role_updated(role, valid_data, request)
+        return role
 
     async def delete_role(self, role_id: int, request: Request | None = None):
         role = await self.get_role(role_id)
@@ -408,11 +417,13 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         perm = await self.rp_repo.get_permission(permission_id)
         if perm is None:
             raise exceptions.PermissionNotFound
+        return perm
 
     async def get_permission_by_codename(self, permission_name: str):
         perm = await self.rp_repo.get_permission_by_codename(permission_name)
         if perm is None:
             raise exceptions.PermissionNotFound
+        return perm
 
     async def create_permission(self, data: type[PC_S], request: Request | None = None):
         valid_data = data.model_dump()
@@ -427,6 +438,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         valid_data = data.model_dump(exclude_unset=True, exclude_defaults=True)
         permission = await self.rp_repo.update_permission(perm, valid_data)
         await self.on_after_permission_updated(permission, valid_data, request)
+        return permission
 
     async def delete_permission(
         self, permission_id: int, request: Request | None = None
@@ -599,7 +611,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
         :param request: Optional fastapi request
         :param response: Optional fastapi response
         """
-        return
+        return  # pragma: no cover
 
     async def on_before_user_delete(
         self, user: UP, request: Request | None = None
