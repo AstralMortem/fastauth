@@ -51,9 +51,11 @@ path = "fastauth/__init__.py"
 [project.optional-dependencies]
 sqlalchemy = [
     "sqlalchemy >= 2.0.36",
+    "greenlet"
 ]
 oauth = [
-    "httpx-oauth >=0.13"
+    "httpx-oauth >=0.13",
+    "httpx >=0.18"
 ]
 
 [tool.hatch.build.targets.sdist]
