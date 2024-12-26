@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "fastauth"
+name = "fastapi-fastauth"
 dynamic = ["version"]
 description = 'Ready-to-use customizable solution for FastAPI with Authentication, Authorization(RBAC) and OAuth2 support'
 readme = "README.md"
@@ -61,6 +61,9 @@ include = [
   "/README.md",
   "/fastauth"
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["fastauth"]
 
 [tool.uv]
 dev-dependencies = [
