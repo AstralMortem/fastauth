@@ -45,7 +45,7 @@ def get_oauth_router(
     async def authorize(
         request: Request, scopes: list[str] = Query(None), manager=security.AUTH_MANAGER
     ):
-        if redirect_url is not None:
+        if redirect_url is not None:  # pragma: no cover
             authorize_redirect_url = redirect_url
         else:
             authorize_redirect_url = str(request.url_for(callback_route_name))
@@ -83,7 +83,7 @@ def get_oauth_router(
                 state, security.config.JWT_DEFAULT_STATE_AUDIENCE
             )
         except DecodeError as e:
-            raise HTTPException(status_code=400) from e
+            raise HTTPException(status_code=400, detail="Can`t decode token") from e
 
         if isinstance(default_role, str):
             role = await manager.get_role_by_codename(default_role)

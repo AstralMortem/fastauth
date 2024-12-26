@@ -142,7 +142,9 @@ extra-dependencies = [
     "pytest-cov",
     "httpx",
     "httpx_oauth",
-    "sqlalchemy"
+    "sqlalchemy",
+    "greenlet",
+    "aiosqlite",
 ]
 
 [tool.hatch.envs.hatch-test.scripts]

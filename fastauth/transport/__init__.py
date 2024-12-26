@@ -24,7 +24,6 @@ def get_token_from_request(
     config: FastAuthConfig,
     request: Request | None = None,
     refresh: bool = False,
-    locations: list[str] | None = None,
 ) -> Callable[..., Coroutine[Any, Any, str]]:
     """
     Get token from request using the token transport locations specified in the FastAuthConfig.TOKEN_LOCATIONS.
@@ -34,15 +33,11 @@ def get_token_from_request(
     :param config: FastAuthConfig
     :param request: FastAPI Request
     :param refresh: flag to set refresh token type
-    :param locations: pass locations to get token from or default will be used
     :return: Callable with coroutine to pass to FastAPI Depends
     """
 
-    if locations is None:
-        locations = config.TOKEN_LOCATIONS
-
     parameters: list[Parameter] = []
-    for location in locations:
+    for location in config.TOKEN_LOCATIONS:
         transport = TRANSPORT_GETTER[location]
         parameters.append(
             Parameter(
@@ -65,7 +60,7 @@ def get_token_from_request(
             )
         if errors:
             raise exceptions.MissingToken(msg=[err.detail for err in errors])
-        msg = f"No token found in request from {locations}"
+        msg = f"No token found in request from {config.TOKEN_LOCATIONS}"
         raise exceptions.MissingToken(msg)
 
     return _token_locations

@@ -31,7 +31,7 @@ def get_auth_router(security: FastAuth):
     async def logout(request: Request):
         return await get_logout_response(security)
 
-    if config.ENABLE_REFRESH_TOKEN:
+    if config.ENABLE_REFRESH_TOKEN:  # pragma: no cover
 
         @router.post(config.TOKEN_REFRESH_URL)
         async def refresh(

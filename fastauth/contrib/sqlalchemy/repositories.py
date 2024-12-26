@@ -30,7 +30,7 @@ class SQLAlchemyUserRepository(AbstractUserRepository[UP, ID], Generic[UP, ID]):
         )
         return await self.session.scalar(qs)
 
-    async def get_by_fields(self, username: str, fields: list[str]) -> UP | None:
+    async def get_by_fields(self, fields: list[str], username: str) -> UP | None:
         qs = (
             select(self.user_model)
             .filter(
@@ -40,7 +40,7 @@ class SQLAlchemyUserRepository(AbstractUserRepository[UP, ID], Generic[UP, ID]):
         )
         return await self.session.scalar(qs)
 
-    async def get_by_field(self, value: Any, field: str) -> UP | None:
+    async def get_by_field(self, field: str, value: Any) -> UP | None:
         qs = select(self.user_model).filter_by(**{field: value}).limit(1)
         return await self.session.scalar(qs)
 
@@ -72,7 +72,7 @@ class SQLAlchemyRBACRepository(
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_role(self, role_id: int) -> RP | None:
+    async def get_role_by_id(self, role_id: int) -> RP | None:
         return await self.session.get(self.role_model, role_id)
 
     async def get_role_by_codename(self, codename: str) -> RP | None:
@@ -101,9 +101,9 @@ class SQLAlchemyRBACRepository(
 
     async def list_roles(self) -> list[RP]:
         qs = select(self.role_model)
-        return list((await self.session.scalars(qs)).all())
+        return list((await self.session.scalars(qs)).unique().all())
 
-    async def get_permission(self, permission_id: int) -> PP | None:
+    async def get_permission_by_id(self, permission_id: int) -> PP | None:
         return await self.session.get(self.permission_model, permission_id)
 
     async def get_permission_by_codename(self, codename: str) -> PP | None:
@@ -134,7 +134,7 @@ class SQLAlchemyRBACRepository(
 
     async def list_permissions(self) -> list[PP]:
         qs = select(self.permission_model)
-        return list((await self.session.scalars(qs)).all())
+        return list((await self.session.scalars(qs)).unique().all())
 
 
 class SQLAlchemyOAuthRepository(AbstractOAuthRepository[UOAP, OAP], Generic[UOAP, OAP]):

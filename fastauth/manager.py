@@ -81,11 +81,11 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
                 user = await self.user_repo.get_by_username(credentials.username)
             else:
                 user = await self.user_repo.get_by_field(
-                    credentials.username, self._config.USER_LOGIN_FIELDS
+                    self._config.USER_LOGIN_FIELDS, credentials.username
                 )
         else:
             user = await self.user_repo.get_by_fields(
-                credentials.username, self._config.USER_LOGIN_FIELDS
+                self._config.USER_LOGIN_FIELDS, credentials.username
             )
 
         if user is None:
@@ -158,14 +158,17 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
             raise exceptions.UserAlreadyExists
 
         if isinstance(self._config.USER_LOGIN_FIELDS, str):
-            if value := data.model_fields.get(self._config.USER_LOGIN_FIELDS, None):
+            if data.model_fields.get(self._config.USER_LOGIN_FIELDS, None):
                 user = await self.user_repo.get_by_field(
-                    value, self._config.USER_LOGIN_FIELDS
+                    self._config.USER_LOGIN_FIELDS,
+                    getattr(data, self._config.USER_LOGIN_FIELDS),
                 )
         else:
             for field_name in self._config.USER_LOGIN_FIELDS:
-                if value := data.model_fields.get(field_name, None):
-                    user = await self.user_repo.get_by_field(value, field_name)
+                if data.model_fields.get(field_name, None):
+                    user = await self.user_repo.get_by_field(
+                        field_name, getattr(data, field_name)
+                    )
                     if user is not None:
                         raise exceptions.UserAlreadyExists
 
@@ -179,7 +182,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
             valid_data["is_active"] = self._config.USER_DEFAULT_IS_ACTIVE
             valid_data["is_verified"] = self._config.USER_DEFAULT_IS_VERIFIED
 
-        if role_id := valid_data.get("role_id", False):
+        if role_id := valid_data.get("role_id", None) is not None:
             if safe:
                 role = await self.get_role_by_codename(self._config.USER_DEFAULT_ROLE)
             else:
@@ -376,7 +379,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
 
     # ============== ROLES CRUD ======================================
     async def get_role(self, role_id: int):
-        role = await self.rp_repo.get_role(role_id)
+        role = await self.rp_repo.get_role_by_id(role_id)
         if role is None:
             raise exceptions.RoleNotFound
         return role
@@ -414,7 +417,7 @@ class BaseAuthManager(Generic[UP, ID, RP, PP, OAP]):
     # =========== PERMISSION CRUD ======================================
 
     async def get_permission(self, permission_id: int):
-        perm = await self.rp_repo.get_permission(permission_id)
+        perm = await self.rp_repo.get_permission_by_id(permission_id)
         if perm is None:
             raise exceptions.PermissionNotFound
         return perm

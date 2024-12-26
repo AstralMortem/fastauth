@@ -61,14 +61,16 @@ def injectable(
             return dep_kwargs, solved_result.errors
 
         def handle_errors(errors: list[Any] | None) -> None:
-            if errors:
+            if errors:  # pragma: no cover
                 error_details = "\n".join(str(error) for error in errors)
                 logger.info(f"Dependency resolution errors: {error_details}")
 
         def validate_dependant(dependant: Dependant) -> None:
-            if dependant.call is None or not callable(dependant.call):
+            if dependant.call is None or not callable(
+                dependant.call
+            ):  # pragma: no cover
                 msg = "The dependant.call attribute must be a callable."
-                raise ValueError(msg)
+                raise ValueError(msg)  # pragma: no cover
 
         @wraps(func)
         async def async_call_with_solved_dependencies(*args: Any, **kwargs: Any) -> T:

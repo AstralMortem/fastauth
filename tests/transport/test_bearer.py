@@ -35,7 +35,6 @@ async def test_schema(bearer_transport):
 
     # assert isinstance(oauth2_schema, OAuth2PasswordBearer)
     assert oauth2_schema.model.flows.password.tokenUrl == "/auth/token"
-    print(oauth2_schema.model.flows)
 
 
 @pytest.mark.asyncio

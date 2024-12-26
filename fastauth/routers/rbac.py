@@ -29,13 +29,13 @@ def get_roles_router(
     router = APIRouter(prefix=security.config.ROUTER_ROLES_DEFAULT_PREFIX)
     admin_dep = _admin_dep(security, default_admin_role, is_active, is_verified)
 
-    @router.get("/{id}", dependencies=[admin_dep], response_model=role_read)
-    async def get_role(id: int, manager=security.AUTH_MANAGER):
-        return await manager.get_role(id)
-
     @router.get("/{codename}", dependencies=[admin_dep], response_model=role_read)
     async def get_role_by_codename(codename: str, manager=security.AUTH_MANAGER):
         return await manager.get_role_by_codename(codename)
+
+    @router.get("/{id}", dependencies=[admin_dep], response_model=role_read)
+    async def get_role(id: int, manager=security.AUTH_MANAGER):
+        return await manager.get_role(id)
 
     @router.post("/", dependencies=[admin_dep], response_model=role_read)
     async def create_role(
@@ -49,18 +49,13 @@ def get_roles_router(
     ):
         return await manager.update_role(id, data, request)
 
-    @router.delete("/{id}", dependencies=[admin_dep], response_model=role_read)
+    @router.delete("/{id}", dependencies=[admin_dep])
     async def delete_role(request: Request, id: int, manager=security.AUTH_MANAGER):
         return await manager.delete_role(id, request)
 
     @router.get("/", dependencies=[admin_dep], response_model=list[role_read])
     async def list_role(manager=security.AUTH_MANAGER):
         return await manager.list_role()
-
-    @router.post("/{id}/assign_user/{user_id}", dependencies=[admin_dep])
-    async def assign_role_to_user(id: int, user_id: str, manager=security.AUTH_MANAGER):
-        await manager.assign_role_to_user(id, user_id)
-        return None
 
     return router
 
@@ -77,13 +72,13 @@ def get_permissions_router(
     router = APIRouter(prefix=security.config.ROUTER_PERMISSIONS_DEFAULT_PREFIX)
     admin_dep = _admin_dep(security, default_admin_role, is_active, is_verified)
 
-    @router.get("/{id}", dependencies=[admin_dep], response_model=permission_read)
-    async def get_permission(id: int, manager=security.AUTH_MANAGER):
-        return await manager.get_permission(id)
-
     @router.get("/{codename}", dependencies=[admin_dep], response_model=permission_read)
     async def get_permission_by_codename(codename: str, manager=security.AUTH_MANAGER):
         return await manager.get_permission_by_codename(codename)
+
+    @router.get("/{id}", dependencies=[admin_dep], response_model=permission_read)
+    async def get_permission(id: int, manager=security.AUTH_MANAGER):
+        return await manager.get_permission(id)
 
     @router.post("/", dependencies=[admin_dep], response_model=permission_read)
     async def create_permission(
@@ -100,7 +95,7 @@ def get_permissions_router(
     ):
         return await manager.update_permission(id, data, request)
 
-    @router.delete("/{id}", dependencies=[admin_dep], response_model=permission_read)
+    @router.delete("/{id}", dependencies=[admin_dep])
     async def delete_permission(
         request: Request, id: int, manager=security.AUTH_MANAGER
     ):

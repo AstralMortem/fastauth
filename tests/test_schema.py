@@ -12,5 +12,3 @@ def test_rbac_mixin():
     assert sorted(list(mixin1.model_fields.keys())) == sorted(
         ["role_id", "role", "permissions"]
     )
-
-    print(mixin2.model_fields)

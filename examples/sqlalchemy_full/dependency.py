@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from examples.sqlaclhemy_full.manager import AuthManager
+from examples.sqlalchemy_full.manager import AuthManager
 from fastauth import FastAuth, FastAuthConfig
 from fastauth.strategy import JWTStrategy
 

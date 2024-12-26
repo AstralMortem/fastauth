@@ -25,12 +25,12 @@ def auth_manager(fastauth_config):
 
 @pytest.mark.asyncio
 async def test_get_role_id(auth_manager):
-    auth_manager.rp_repo.get_role = AsyncMock(return_value=123)
+    auth_manager.rp_repo.get_role_by_id = AsyncMock(return_value=123)
     result = await auth_manager.get_role(123)
     assert result == 123
 
     with pytest.raises(exceptions.RoleNotFound):
-        auth_manager.rp_repo.get_role = AsyncMock(return_value=None)
+        auth_manager.rp_repo.get_role_by_id = AsyncMock(return_value=None)
         await auth_manager.get_role(456)
 
 
@@ -77,7 +77,7 @@ async def test_role_list(auth_manager):
 
 @pytest.mark.asyncio
 async def test_assign_role_to_user(auth_manager):
-    auth_manager.rp_repo.get_role.return_value = MagicMock(id=1)
+    auth_manager.rp_repo.get_role_by_id.return_value = MagicMock(id=1)
     auth_manager.user_repo.get_by_id.return_value = MagicMock(id="user-id")
 
     async def update(user, data):

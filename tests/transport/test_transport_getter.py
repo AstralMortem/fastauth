@@ -75,3 +75,9 @@ async def test_get_token_from_request(fastauth_config, mock_request):
     # Test missing token
     with pytest.raises(exceptions.MissingToken):
         await token_getter(headers=None, cookies=None)
+
+    fastauth_config.TOKEN_LOCATIONS = []
+    token_getter = get_token_from_request(fastauth_config, mock_request)
+
+    with pytest.raises(exceptions.MissingToken):
+        await token_getter()

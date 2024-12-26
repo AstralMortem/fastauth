@@ -25,11 +25,10 @@ class InvalidToken(HTTPException):
 
 class ItemNotFound(HTTPException):
     def __init__(self, msg: str | None = None, headers: dict[str, str] | None = None):
-        text = "Item not found"
-        if msg:
-            text = msg
         super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND, detail=text, headers=headers
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=msg or "Item not found",
+            headers=headers,
         )
 
 

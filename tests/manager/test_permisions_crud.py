@@ -22,12 +22,12 @@ def auth_manager(fastauth_config):
 
 @pytest.mark.asyncio
 async def test_get_permission_id(auth_manager):
-    auth_manager.rp_repo.get_permission = AsyncMock(return_value=123)
+    auth_manager.rp_repo.get_permission_by_id = AsyncMock(return_value=123)
     result = await auth_manager.get_permission(123)
     assert result == 123
 
     with pytest.raises(exceptions.PermissionNotFound):
-        auth_manager.rp_repo.get_permission = AsyncMock(return_value=None)
+        auth_manager.rp_repo.get_permission_by_id = AsyncMock(return_value=None)
         await auth_manager.get_permission(456)
 
 

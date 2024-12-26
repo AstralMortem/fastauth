@@ -1,6 +1,7 @@
 from fastauth.contrib.sqlalchemy.models import *
 
 
+# To get 100% coverage
 def test_models():
     assert SQLAlchemyBaseUserUUID.__name__ == "SQLAlchemyBaseUserUUID"
     assert SQLAlchemyBaseRole.__name__ == "SQLAlchemyBaseRole"

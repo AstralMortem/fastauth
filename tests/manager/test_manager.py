@@ -249,7 +249,7 @@ async def test_register(
     auth_manager.user_repo.create.side_effect = lambda data: MagicMock(**data)
 
     auth_manager.rp_repo.get_role_by_codename.return_value = MagicMock(id=2)
-    auth_manager.rp_repo.get_role.return_value = (
+    auth_manager.rp_repo.get_role_by_id.return_value = (
         None if role_id == 999 else MagicMock(id=role_id)
     )
 

@@ -38,7 +38,7 @@ class AbstractUserRepository(Generic[UP, ID], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_by_fields(self, value: str, fields: list[str]) -> UP | None:
+    async def get_by_fields(self, fields: list[str], value: Any) -> UP | None:
         """
         Get user by multiple fields and username. Just check in cycle if user.<field> == username
         :param value: User field value
@@ -48,7 +48,7 @@ class AbstractUserRepository(Generic[UP, ID], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_by_field(self, value: Any, field: str) -> UP | None:
+    async def get_by_field(self, field: str, value: Any) -> UP | None:
         """
         Get user by his value in field
         :param value: User model field value
@@ -91,7 +91,7 @@ class AbstractRolePermissionRepository(Generic[RP, PP], ABC):
     permission_model: type[PP]
 
     @abstractmethod
-    async def get_role(self, role_id: int) -> RP | None:
+    async def get_role_by_id(self, role_id: int) -> RP | None:
         """
         Ger role by id
         :param role_id: INTEGER Primary key
@@ -146,7 +146,7 @@ class AbstractRolePermissionRepository(Generic[RP, PP], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_permission(self, permission_id: int) -> PP | None:
+    async def get_permission_by_id(self, permission_id: int) -> PP | None:
         """
         Get permission by id
         :param permission_id: INTEGER Primary key
