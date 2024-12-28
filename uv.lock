@@ -373,8 +373,8 @@ wheels = [
 ]
 
 [[package]]
-name = "fastauth"
-version = "0.0.2"
+name = "fastapi-fastauth"
+version = "1.0.1"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
@@ -387,9 +387,11 @@ dependencies = [
 
 [package.optional-dependencies]
 oauth = [
+    { name = "httpx" },
     { name = "httpx-oauth" },
 ]
 sqlalchemy = [
+    { name = "greenlet" },
     { name = "sqlalchemy" },
 ]
 
@@ -418,6 +420,8 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.115.6" },
+    { name = "greenlet", marker = "extra == 'sqlalchemy'" },
+    { name = "httpx", marker = "extra == 'oauth'", specifier = ">=0.18" },
     { name = "httpx-oauth", marker = "extra == 'oauth'", specifier = ">=0.13" },
     { name = "makefun", specifier = ">=1.15.6" },
     { name = "pwdlib", extras = ["argon2", "bcrypt"], specifier = ">=0.2.1" },
